@@ -14,6 +14,6 @@ Description:
   FSets/FMap library. IntMap can be now seen as a particular
   implementation of FMapInterface, see file FMapIntMap.
 
-Keywords: finite sets maps binary integers efficient data structures
-
+Keywords: finite sets, maps, binary integers, efficient data structures, data structures
+Category: Computer Science/Data Types and Data Structures
 
