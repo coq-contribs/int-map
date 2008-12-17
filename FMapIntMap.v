@@ -61,6 +61,8 @@ Module NUsualOrderedType <: UsualOrderedType.
   apply EQ; auto.
   Qed.
 
+  Definition eq_dec := N_as_OT.eq_dec.
+
 End NUsualOrderedType.
  
 
@@ -439,10 +441,10 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
     anti_elements (L.map2 f (elements m) (elements m')).
 
   Lemma add_spec : forall (A:Type)(m:t A) x y e, 
-    find x (add y e m) = if ME.eq_dec x y then Some e else find x m.
+    find x (add y e m) = if E.eq_dec x y then Some e else find x m.
   Proof.
   intros.
-  destruct (ME.eq_dec x y).
+  destruct (E.eq_dec x y).
   apply find_1.
   eapply MapsTo_1 with y; eauto.
   red; auto.
@@ -472,15 +474,15 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   intuition.
   red in H3.
   rewrite add_spec in H3; auto.
-  destruct (ME.eq_dec k0 k).
+  destruct (E.eq_dec k0 k).
   inversion_clear H3; subst; auto.
   right; apply find_2; auto.
   inversion_clear H3; auto.
   compute in H; destruct H.
   subst; right; apply add_1; auto.
   red; auto.
-  destruct (ME.eq_dec k0 k).
-  unfold E.eq in *; subst.
+  destruct (E.eq_dec k0 k) as [H|H].
+  red in H; subst.
   destruct (H0 k); eauto.
   red; eauto.
   right; apply add_2; unfold E.eq in *; auto.
