@@ -491,9 +491,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   assert (~E.eq x k).
    contradict H1.
    destruct H.
-   apply InA_eqA with (x,x0); eauto.
-   unfold eq_key, E.eq; eauto.
-   unfold eq_key, E.eq; congruence.
+   apply InA_eqA with (x,x0); eauto with *.
   apply (H0 x).
   destruct H; exists x0; auto.
   revert H3.
