@@ -482,7 +482,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   subst; right; apply add_1; auto.
   red; auto.
   destruct (E.eq_dec k0 k) as [H|H].
-  red in H; subst.
+  subst.
   destruct (H0 k); eauto.
   red; eauto.
   right; apply add_2; unfold E.eq in *; auto.
