@@ -15,6 +15,8 @@ Require Import NArith.
 Require Import Ndigits.
 Require Import Ndec.
 
+Global Set Asymmetric Patterns.
+
 (* The type [ad] of addresses is now [N] in [BinNat]. *)
 
 Definition ad := N. 
