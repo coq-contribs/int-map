@@ -29,7 +29,7 @@ Section MapLists.
   Fixpoint ad_in_list (a:ad) (l:list ad) {struct l} : bool :=
     match l with
     | nil => false
-    | a' :: l' => orb (Neqb a a') (ad_in_list a l')
+    | a' :: l' => orb (N.eqb a a') (ad_in_list a l')
     end.
 
   Fixpoint ad_list_stutters (l:list ad) : bool :=
@@ -44,7 +44,7 @@ Section MapLists.
      {l1 : list ad &  {l2 : list ad | l = l1 ++ x :: l2}}.
   Proof.
     simple induction l. intro. discriminate H.
-    intros. elim (sumbool_of_bool (Neqb x a)). intro H1. simpl in H0. split with (nil (A:=ad)).
+    intros. elim (sumbool_of_bool (N.eqb x a)). intro H1. simpl in H0. split with (nil (A:=ad)).
     split with l0. rewrite (Neqb_complete _ _ H1). reflexivity.
     intro H2. simpl in H0. rewrite H2 in H0. simpl in H0. elim (H H0). intros l'1 H3.
     split with (a :: l'1). elim H3. intros l2 H4. split with l2. rewrite H4. reflexivity.
@@ -354,10 +354,10 @@ Section MapLists.
         (fun (a:ad) (l:list ad) => ad_in_list a l) (
         fun c:ad => refl_equal _) ad_in_list_app
         (fun (a0:ad) (_:A) => a0 :: nil) m a).
-    simpl in |- *. rewrite (MapFold_orb A (fun (a0:ad) (_:A) => orb (Neqb a a0) false) m).
+    simpl in |- *. rewrite (MapFold_orb A (fun (a0:ad) (_:A) => orb (N.eqb a a0) false) m).
     elim
      (option_sum _
-        (MapSweep A (fun (a0:ad) (_:A) => orb (Neqb a a0) false) m)). intro H. elim H.
+        (MapSweep A (fun (a0:ad) (_:A) => orb (N.eqb a a0) false) m)). intro H. elim H.
     intro r. elim r. intros a0 y H0. rewrite H0. unfold in_dom in |- *.
     elim (orb_prop _ _ (MapSweep_semantics_1 _ _ _ _ _ H0)). intro H1.
     rewrite (Neqb_complete _ _ H1). rewrite (MapSweep_semantics_2 A _ _ _ _ H0). reflexivity.
@@ -398,7 +398,7 @@ Section MapLists.
           pf m) = MapCard A m.
   Proof.
     simple induction m; try trivial. simpl in |- *. intros. rewrite ad_list_app_length.
-    rewrite (H (fun a0:ad => pf (Ndouble a0))). rewrite (H0 (fun a0:ad => pf (Ndouble_plus_one a0))).
+    rewrite (H (fun a0:ad => pf (N.double a0))). rewrite (H0 (fun a0:ad => pf (Ndouble_plus_one a0))).
     reflexivity.
   Qed.
 
@@ -424,7 +424,7 @@ Section MapLists.
      MapFold1 unit (list ad) nil (app (A:=ad))
        (fun (a:ad) (_:unit) => a :: nil) pf (MapDom A m).
   Proof.
-    simple induction m; try trivial. simpl in |- *. intros. rewrite (H (fun a0:ad => pf (Ndouble a0))).
+    simple induction m; try trivial. simpl in |- *. intros. rewrite (H (fun a0:ad => pf (N.double a0))).
     rewrite (H0 (fun a0:ad => pf (Ndouble_plus_one a0))). reflexivity.
   Qed.
 

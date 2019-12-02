@@ -199,7 +199,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   rewrite MapPut_semantics.
   rewrite H0.
   generalize (Neqb_complete x y).
-  destruct (Neqb x y); auto.
+  destruct (N.eqb x y); auto.
   intros.
   elim H; auto.
   apply H1; auto.
@@ -211,7 +211,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   rewrite MapPut_semantics.
   intro H.
   generalize (Neqb_complete x y).
-  destruct (Neqb x y); auto.
+  destruct (N.eqb x y); auto.
   intros; elim H; auto.
   apply H0; auto.
   Qed.
@@ -232,7 +232,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   intros.
   rewrite H0.
   generalize (Neqb_complete x y).
-  destruct (Neqb x y); auto.
+  destruct (N.eqb x y); auto.
   intros; elim H; apply H1; auto.
   Qed.
 
@@ -240,7 +240,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   Proof. 
   unfold MapsTo, find, remove.
   rewrite MapRemove_semantics.
-  destruct (Neqb x y); intros; auto.
+  destruct (N.eqb x y); intros; auto.
   discriminate.
   Qed.
 
@@ -285,7 +285,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   intro; discriminate.
   destruct a; simpl; auto.
   generalize (Neqb_complete a x).
-  destruct (Neqb a x); auto.
+  destruct (N.eqb a x); auto.
   left.
   injection H0; auto.
   intros; f_equal; auto.
@@ -317,7 +317,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   unfold PE.ltk; simpl.
   intros H3; generalize (E.lt_not_eq H3).
   generalize (Neqb_complete a0 e0).
-  destruct (Neqb a0 e0); auto.
+  destruct (N.eqb a0 e0); auto.
   destruct 2.
   apply H4; auto.
   inversion H; auto.
@@ -351,7 +351,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
     match m with 
       | M0 => M0 _ 
       | M1 x y => M1 _ x (f (pf x) y)
-      | M2 m0 m1 =>  M2 _ (mapi_aux (fun n => pf (Ndouble n)) f m0)
+      | M2 m0 m1 =>  M2 _ (mapi_aux (fun n => pf (N.double n)) f m0)
                                          (mapi_aux (fun n => pf (Ndouble_plus_one n)) f m1)
     end.
     
@@ -371,19 +371,19 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   intros.
   exists x; split; [red; auto|].
   generalize (Neqb_complete a x).
-  destruct (Neqb a x); try discriminate.
+  destruct (N.eqb a x); try discriminate.
   injection H; intros; subst; auto.
   rewrite H1; auto.
 
   intros.
   exists x; split; [red;auto|].
   destruct x; simpl in *.
-  destruct (IHm1 (fun n : N => pf (Ndouble n)) _ _ f H) as (y,(Hy,Hy')).
+  destruct (IHm1 (fun n : N => pf (N.double n)) _ _ f H) as (y,(Hy,Hy')).
   rewrite Hy in Hy'; simpl in Hy'; auto.
   destruct p; simpl in *.
   destruct (IHm2 (fun n : N => pf (Ndouble_plus_one n)) _ _ f H) as (y,(Hy,Hy')).
   rewrite Hy in Hy'; simpl in Hy'; auto.
-  destruct (IHm1 (fun n : N => pf (Ndouble n)) _ _ f H) as (y,(Hy,Hy')).
+  destruct (IHm1 (fun n : N => pf (N.double n)) _ _ f H) as (y,(Hy,Hy')).
   rewrite Hy in Hy'; simpl in Hy'; auto.
   destruct (IHm2 (fun n : N => pf (Ndouble_plus_one n)) _ _ f H) as (y,(Hy,Hy')).
   rewrite Hy in Hy'; simpl in Hy'; auto.
@@ -404,7 +404,7 @@ Module MapIntMap <: S with Module E:=NUsualOrderedType.
   intros pf x f (e,He); inversion He.
   intros pf x f (e,He).
   exists a0.
-  destruct (Neqb a x); try discriminate; auto.
+  destruct (N.eqb a x); try discriminate; auto.
   intros pf x f (e,He).
   destruct x; [|destruct p]; eauto.
   Qed.

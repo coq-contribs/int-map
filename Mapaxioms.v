@@ -59,7 +59,7 @@ Section MapAxioms.
   Proof.
     unfold eqmap, eqm in |- *. intros. rewrite (MapPut_semantics A m a y a0).
     rewrite (MapMerge_semantics A m (M1 A a y) a0). unfold MapGet at 2.
-    elim (sumbool_of_bool (Neqb a a0)); intro H; rewrite H; reflexivity.
+    elim (sumbool_of_bool (N.eqb a a0)); intro H; rewrite H; reflexivity.
   Qed.
 
   Lemma MapPut_ext :
@@ -69,7 +69,7 @@ Section MapAxioms.
   Proof.
     unfold eqmap, eqm in |- *. intros. rewrite (MapPut_semantics A m' a y a0).
     rewrite (MapPut_semantics A m a y a0). 
-    case (Neqb a a0); [ reflexivity | apply H ].
+    case (N.eqb a a0); [ reflexivity | apply H ].
   Qed.
 
   Lemma MapPut_behind_as_Merge :
@@ -188,7 +188,7 @@ Section MapAxioms.
      eqmap (MapRemove A m a) (MapDomRestrBy A B m (M1 B a y)).
   Proof.
     unfold eqmap, eqm in |- *. intros. rewrite (MapRemove_semantics A m a a0).
-    rewrite (MapDomRestrBy_semantics A B m (M1 B a y) a0). elim (sumbool_of_bool (Neqb a a0)).
+    rewrite (MapDomRestrBy_semantics A B m (M1 B a y) a0). elim (sumbool_of_bool (N.eqb a a0)).
     intro H. rewrite H. rewrite (Neqb_complete a a0 H). rewrite (M1_semantics_1 B a0 y).
     reflexivity.
     intro H. rewrite H. rewrite (M1_semantics_2 B a a0 y H). reflexivity.
@@ -200,7 +200,7 @@ Section MapAxioms.
   Proof.
     unfold eqmap, eqm in |- *. intros. rewrite (MapRemove_semantics A m' a a0).
     rewrite (MapRemove_semantics A m a a0). 
-    case (Neqb a a0); [ reflexivity | apply H ].
+    case (N.eqb a a0); [ reflexivity | apply H ].
   Qed.
 
   Lemma MapDomRestrTo_empty_m_1 :

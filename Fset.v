@@ -52,14 +52,14 @@ Section Dom.
           end).
   Proof.
     unfold eqm in |- *. simple induction m. simpl in |- *. intros. case (MapGet B m' a); trivial.
-    intros. simpl in |- *. elim (sumbool_of_bool (Neqb a a1)). intro H. rewrite H.
+    intros. simpl in |- *. elim (sumbool_of_bool (N.eqb a a1)). intro H. rewrite H.
     rewrite <- (Neqb_complete _ _ H). case (MapGet B m' a); try reflexivity.
     intro. apply M1_semantics_1.
     intro H. rewrite H. case (MapGet B m' a). 
     case (MapGet B m' a1); intros; exact (M1_semantics_2 A a a1 a0 H).
     case (MapGet B m' a1); reflexivity.
     simple induction m'. trivial.
-    unfold MapDomRestrTo in |- *. intros. elim (sumbool_of_bool (Neqb a a1)).
+    unfold MapDomRestrTo in |- *. intros. elim (sumbool_of_bool (N.eqb a a1)).
     intro H1.
     rewrite (Neqb_complete _ _ H1). rewrite (M1_semantics_1 B a1 a0).
     case (MapGet A (M2 A m0 m1) a1); try reflexivity.
@@ -73,7 +73,7 @@ Section Dom.
     | Some _ => MapGet A (M2 A m0 m1) a
     end) in |- *.
     rewrite (makeM2_M2 A (MapDomRestrTo m0 m2) (MapDomRestrTo m1 m3) a).
-    rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (Ndiv2 a)). rewrite (H m2 (Ndiv2 a)).
+    rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (N.div2 a)). rewrite (H m2 (N.div2 a)).
     rewrite (MapGet_M2_bit_0_if B m2 m3 a). rewrite (MapGet_M2_bit_0_if A m0 m1 a).
     case (Nbit0 a); reflexivity.
   Qed.
@@ -106,7 +106,7 @@ Section Dom.
           end).
   Proof.
     unfold eqm in |- *. simple induction m. simpl in |- *. intros. case (MapGet B m' a); trivial.
-    intros. simpl in |- *. elim (sumbool_of_bool (Neqb a a1)). intro H. rewrite H.
+    intros. simpl in |- *. elim (sumbool_of_bool (N.eqb a a1)). intro H. rewrite H.
     rewrite (Neqb_complete _ _ H). case (MapGet B m' a1). trivial.
     apply M1_semantics_1.
     intro H. rewrite H. case (MapGet B m' a). 
@@ -115,7 +115,7 @@ Section Dom.
     case (MapGet B m' a1); trivial.
     simple induction m'. trivial.
     unfold MapDomRestrBy in |- *. intros. rewrite (MapRemove_semantics A (M2 A m0 m1) a a1).
-    elim (sumbool_of_bool (Neqb a a1)). intro H1. rewrite H1. rewrite (Neqb_complete _ _ H1).
+    elim (sumbool_of_bool (N.eqb a a1)). intro H1. rewrite H1. rewrite (Neqb_complete _ _ H1).
     rewrite (M1_semantics_1 B a1 a0). reflexivity.
     intro H1. rewrite H1. rewrite (M1_semantics_2 B a a1 a0 H1). reflexivity.
     intros. change
@@ -125,7 +125,7 @@ Section Dom.
     | Some _ => None
     end) in |- *.
     rewrite (makeM2_M2 A (MapDomRestrBy m0 m2) (MapDomRestrBy m1 m3) a).
-    rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (Ndiv2 a)). rewrite (H m2 (Ndiv2 a)).
+    rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (N.div2 a)). rewrite (H m2 (N.div2 a)).
     rewrite (MapGet_M2_bit_0_if B m2 m3 a). rewrite (MapGet_M2_bit_0_if A m0 m1 a).
     case (Nbit0 a); reflexivity.
   Qed.
@@ -141,9 +141,9 @@ Section Dom.
     trivial.
   Qed.
 
-  Lemma in_dom_M1 : forall (a a0:ad) (y:A), in_dom a0 (M1 A a y) = Neqb a a0.
+  Lemma in_dom_M1 : forall (a a0:ad) (y:A), in_dom a0 (M1 A a y) = N.eqb a a0.
   Proof.
-    unfold in_dom in |- *. intros. simpl in |- *. case (Neqb a a0); reflexivity.
+    unfold in_dom in |- *. intros. simpl in |- *. case (N.eqb a a0); reflexivity.
   Qed.
 
   Lemma in_dom_M1_1 : forall (a:ad) (y:A), in_dom a (M1 A a y) = true.
@@ -175,10 +175,10 @@ Section Dom.
 
   Lemma in_dom_put :
    forall (m:Map A) (a0:ad) (y0:A) (a:ad),
-     in_dom a (MapPut A m a0 y0) = orb (Neqb a a0) (in_dom a m).
+     in_dom a (MapPut A m a0 y0) = orb (N.eqb a a0) (in_dom a m).
   Proof.
     unfold in_dom in |- *. intros. rewrite (MapPut_semantics A m a0 y0 a).
-    elim (sumbool_of_bool (Neqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
+    elim (sumbool_of_bool (N.eqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
     rewrite H. rewrite orb_true_b. reflexivity.
     intro H. rewrite H. rewrite (Neqb_comm a a0) in H. rewrite H. rewrite orb_false_b.
     reflexivity.
@@ -186,20 +186,20 @@ Section Dom.
 
   Lemma in_dom_put_behind :
    forall (m:Map A) (a0:ad) (y0:A) (a:ad),
-     in_dom a (MapPut_behind A m a0 y0) = orb (Neqb a a0) (in_dom a m).
+     in_dom a (MapPut_behind A m a0 y0) = orb (N.eqb a a0) (in_dom a m).
   Proof.
     unfold in_dom in |- *. intros. rewrite (MapPut_behind_semantics A m a0 y0 a).
-    elim (sumbool_of_bool (Neqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
+    elim (sumbool_of_bool (N.eqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
     rewrite H. case (MapGet A m a); reflexivity.
     intro H. rewrite H. rewrite (Neqb_comm a a0) in H. rewrite H. case (MapGet A m a); trivial.
   Qed.
 
   Lemma in_dom_remove :
    forall (m:Map A) (a0 a:ad),
-     in_dom a (MapRemove A m a0) = andb (negb (Neqb a a0)) (in_dom a m).
+     in_dom a (MapRemove A m a0) = andb (negb (N.eqb a a0)) (in_dom a m).
   Proof.
     unfold in_dom in |- *. intros. rewrite (MapRemove_semantics A m a0 a).
-    elim (sumbool_of_bool (Neqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
+    elim (sumbool_of_bool (N.eqb a a0)). intro H. rewrite H. rewrite (Neqb_comm a a0) in H.
     rewrite H. reflexivity.
     intro H. rewrite H. rewrite (Neqb_comm a a0) in H. rewrite H.
     case (MapGet A m a); reflexivity.
@@ -276,7 +276,7 @@ Section FSetDefs.
   Proof.
     simple induction m. intros. discriminate H.
     unfold MapDom in |- *. unfold in_FSet in |- *. unfold in_dom in |- *. unfold MapGet in |- *. intros a y a0 y0.
-    case (Neqb a a0). trivial.
+    case (N.eqb a a0). trivial.
     intro. discriminate H.
     intros m0 H m1 H0 a y. rewrite (MapGet_M2_bit_0_if A m0 m1 a). simpl in |- *. unfold in_FSet in |- *.
     unfold in_dom in |- *. rewrite (MapGet_M2_bit_0_if unit (MapDom m0) (MapDom m1) a).
@@ -289,7 +289,7 @@ Section FSetDefs.
      in_FSet a (MapDom m) = true -> {y : A | MapGet A m a = Some y}.
   Proof.
     simple induction m. intros. discriminate H.
-    unfold MapDom in |- *. unfold in_FSet in |- *. unfold in_dom in |- *. unfold MapGet in |- *. intros a y a0. case (Neqb a a0).
+    unfold MapDom in |- *. unfold in_FSet in |- *. unfold in_dom in |- *. unfold MapGet in |- *. intros a y a0. case (N.eqb a a0).
     intro. split with y. reflexivity.
     intro. discriminate H.
     intros m0 H m1 H0 a. rewrite (MapGet_M2_bit_0_if A m0 m1 a). simpl in |- *. unfold in_FSet in |- *.

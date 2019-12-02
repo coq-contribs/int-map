@@ -59,7 +59,7 @@ Section MapCanon.
     unfold eqmap, eqm in |- *. intros. rewrite <- (Ndouble_div2 a).
     rewrite <- (MapGet_M2_bit_0_0 A _ (Ndouble_bit0 a) m0 m1).
     rewrite <- (MapGet_M2_bit_0_0 A _ (Ndouble_bit0 a) m2 m3).
-    exact (H (Ndouble a)).
+    exact (H (N.double a)).
   Qed.
 
   Lemma M2_eqmap_2 :
@@ -85,7 +85,7 @@ Section MapCanon.
     rewrite (Neqb_correct a). intro. discriminate H2.
     exact (H1 a).
     intros a0 y0 H H0 H1. cut (MapGet A (M1 A a y) a = MapGet A (M1 A a0 y0) a). simpl in |- *.
-    rewrite (Neqb_correct a). intro. elim (sumbool_of_bool (Neqb a0 a)). intro H3.
+    rewrite (Neqb_correct a). intro. elim (sumbool_of_bool (N.eqb a0 a)). intro H3.
     rewrite H3 in H2. inversion H2. rewrite (Neqb_complete _ _ H3). reflexivity.
     intro H3. rewrite H3 in H2. discriminate H2.
     exact (H1 a).
@@ -192,7 +192,7 @@ Section MapCanon.
     intro. case m. intro. case m'. intros. exact M0_canon.
     intros a y H H0. exact (M1_canon (Ndouble_plus_one a) y).
     intros. simpl in |- *. apply M2_canon; try assumption. exact (mapcanon_M2 m0 m1 H0).
-    intros a y m'. case m'. intros. exact (M1_canon (Ndouble a) y).
+    intros a y m'. case m'. intros. exact (M1_canon (N.double a) y).
     intros a0 y0 H H0. simpl in |- *. apply M2_canon; try assumption. apply le_n.
     intros. simpl in |- *. apply M2_canon; try assumption.
     apply le_trans with (m := MapCard A (M2 A m0 m1)). exact (mapcanon_M2 _ _ H0).
@@ -215,7 +215,7 @@ Section MapCanon.
     intros. simpl in |- *. unfold eqmap, eqm in |- *. intro.
     rewrite (makeM2_M2 A (MapCanonicalize m0) (MapCanonicalize m1) a).
     rewrite MapGet_M2_bit_0_if. rewrite MapGet_M2_bit_0_if.
-    rewrite <- (H (Ndiv2 a)). rewrite <- (H0 (Ndiv2 a)). reflexivity.
+    rewrite <- (H (N.div2 a)). rewrite <- (H0 (N.div2 a)). reflexivity.
   Qed.
 
   Lemma mapcanon_exists_2 : forall m:Map A, mapcanon (MapCanonicalize m).
@@ -236,7 +236,7 @@ Section MapCanon.
    forall m:Map A, mapcanon m -> forall a:ad, mapcanon (MapRemove A m a).
   Proof.
     simple induction m. intros. exact M0_canon.
-    intros a y H a0. simpl in |- *. case (Neqb a a0). exact M0_canon.
+    intros a y H a0. simpl in |- *. case (N.eqb a a0). exact M0_canon.
     assumption.
     intros. simpl in |- *. case (Nbit0 a). apply makeM2_canon. exact (mapcanon_M2_1 _ _ H1).
     apply H0. exact (mapcanon_M2_2 _ _ H1).

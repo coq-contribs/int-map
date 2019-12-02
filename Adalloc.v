@@ -27,9 +27,9 @@ Section AdAlloc.
   Fixpoint ad_alloc_opt (m:Map A) : ad :=
     match m with
     | M0 => N0
-    | M1 a _ => if Neqb a N0 then Npos 1 else N0
+    | M1 a _ => if N.eqb a N0 then Npos 1 else N0
     | M2 m1 m2 =>
-        Nmin (Ndouble (ad_alloc_opt m1))
+        N.min (N.double (ad_alloc_opt m1))
           (Ndouble_plus_one (ad_alloc_opt m2))
     end.
 
@@ -37,15 +37,15 @@ Section AdAlloc.
    forall m:Map A, MapGet A m (ad_alloc_opt m) = None.
   Proof.
     induction m as [| a| m0 H m1 H0]. reflexivity.
-    simpl in |- *. elim (sumbool_of_bool (Neqb a N0)). intro H. rewrite H.
+    simpl in |- *. elim (sumbool_of_bool (N.eqb a N0)). intro H. rewrite H.
     rewrite (Neqb_complete _ _ H). reflexivity.
     intro H. rewrite H. rewrite H. reflexivity.
     intros. change
-   (ad_alloc_opt (M2 A m0 m1)) with (Nmin (Ndouble (ad_alloc_opt m0))
+   (ad_alloc_opt (M2 A m0 m1)) with (N.min (N.double (ad_alloc_opt m0))
                                        (Ndouble_plus_one (ad_alloc_opt m1)))
   in |- *.
     elim
-     (Nmin_choice (Ndouble (ad_alloc_opt m0))
+     (Nmin_choice (N.double (ad_alloc_opt m0))
         (Ndouble_plus_one (ad_alloc_opt m1))).
     intro H1. rewrite H1. rewrite MapGet_M2_bit_0_0. rewrite Ndouble_div2. assumption.
     apply Ndouble_bit0.
@@ -66,8 +66,8 @@ Section AdAlloc.
    forall (m:Map A) (a:ad),
      Nleb (ad_alloc_opt m) a = false -> {y : A | MapGet A m a = Some y}.
   Proof.
-    induction m as [| a y| m0 H m1 H0]. simpl in |- *. unfold Nle in |- *. simpl in |- *. intros. discriminate H.
-    simpl in |- *. intros b H. elim (sumbool_of_bool (Neqb a N0)). intro H0. rewrite H0 in H.
+    induction m as [| a y| m0 H m1 H0]. simpl in |- *. unfold N.le in |- *. simpl in |- *. intros. discriminate H.
+    simpl in |- *. intros b H. elim (sumbool_of_bool (N.eqb a N0)). intro H0. rewrite H0 in H.
     unfold Nleb in H. cut (N0 = b). intro. split with y. rewrite <- H1. rewrite H0. reflexivity.
     rewrite <- (N_of_nat_of_N b).
     rewrite <- (le_n_O_eq _ (le_S_n _ _ (leb_complete_conv _ _ H))). reflexivity.

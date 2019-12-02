@@ -48,7 +48,7 @@ Section MapDefs.
   Fixpoint MapGet (m:Map) : ad -> option A :=
     match m with
     | M0 => fun a:ad => None
-    | M1 x y => fun a:ad => if Neqb x a then Some y else None
+    | M1 x y => fun a:ad => if N.eqb x a then Some y else None
     | M2 m1 m2 =>
         fun a:ad =>
           match a with
@@ -73,7 +73,7 @@ Section MapDefs.
   Lemma MapSingleton_semantics :
    forall (a:ad) (y:A),
      eqm (MapGet (MapSingleton a y))
-       (fun a':ad => if Neqb a a' then Some y else None).
+       (fun a':ad => if N.eqb a a' then Some y else None).
   Proof.
     simpl in |- *. unfold eqm in |- *. trivial.
   Qed.
@@ -84,25 +84,25 @@ Section MapDefs.
   Qed.
 
   Lemma M1_semantics_2 :
-   forall (a a':ad) (y:A), Neqb a a' = false -> MapGet (M1 a y) a' = None.
+   forall (a a':ad) (y:A), N.eqb a a' = false -> MapGet (M1 a y) a' = None.
   Proof.
     intros. simpl in |- *. rewrite H. reflexivity.
   Qed.
 
   Lemma Map2_semantics_1 :
    forall m m':Map,
-     eqm (MapGet m) (fun a:ad => MapGet (M2 m m') (Ndouble a)).
+     eqm (MapGet m) (fun a:ad => MapGet (M2 m m') (N.double a)).
   Proof.
     unfold eqm in |- *. simple induction a; trivial.
   Qed.
 
   Lemma Map2_semantics_1_eq :
    forall (m m':Map) (f:ad -> option A),
-     eqm (MapGet (M2 m m')) f -> eqm (MapGet m) (fun a:ad => f (Ndouble a)).
+     eqm (MapGet (M2 m m')) f -> eqm (MapGet m) (fun a:ad => f (N.double a)).
   Proof.
     unfold eqm in |- *.
     intros.
-    rewrite <- (H (Ndouble a)).
+    rewrite <- (H (N.double a)).
     exact (Map2_semantics_1 m m' a).
   Qed.
 
@@ -127,7 +127,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_0 :
    forall a:ad,
      Nbit0 a = false ->
-     forall m m':Map, MapGet (M2 m m') a = MapGet m (Ndiv2 a).
+     forall m m':Map, MapGet (M2 m m') a = MapGet m (N.div2 a).
   Proof.
     simple induction a; trivial. simple induction p. intros. discriminate H0.
     trivial.
@@ -137,7 +137,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_1 :
    forall a:ad,
      Nbit0 a = true ->
-     forall m m':Map, MapGet (M2 m m') a = MapGet m' (Ndiv2 a).
+     forall m m':Map, MapGet (M2 m m') a = MapGet m' (N.div2 a).
   Proof.
     simple induction a. intros. discriminate H.
     simple induction p. trivial.
@@ -148,7 +148,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_if :
    forall (m m':Map) (a:ad),
      MapGet (M2 m m') a =
-     (if Nbit0 a then MapGet m' (Ndiv2 a) else MapGet m (Ndiv2 a)).
+     (if Nbit0 a then MapGet m' (N.div2 a) else MapGet m (N.div2 a)).
   Proof.
     intros. elim (sumbool_of_bool (Nbit0 a)). intro H. rewrite H.
     apply MapGet_M2_bit_0_1; assumption.
@@ -158,7 +158,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0 :
    forall (m m' m'':Map) (a:ad),
      (if Nbit0 a then MapGet (M2 m' m) a else MapGet (M2 m m'') a) =
-     MapGet m (Ndiv2 a).
+     MapGet m (N.div2 a).
   Proof.
     intros. elim (sumbool_of_bool (Nbit0 a)). intro H. rewrite H.
     apply MapGet_M2_bit_0_1; assumption.
@@ -170,8 +170,8 @@ Section MapDefs.
      eqm (MapGet (M2 m m'))
        (fun a:ad =>
           match Nbit0 a with
-          | false => MapGet m (Ndiv2 a)
-          | true => MapGet m' (Ndiv2 a)
+          | false => MapGet m (N.div2 a)
+          | true => MapGet m' (N.div2 a)
           end).
   Proof.
     unfold eqm in |- *.
@@ -186,14 +186,14 @@ Section MapDefs.
      eqm (MapGet (M2 m m'))
        (fun a:ad =>
           match Nbit0 a with
-          | false => f (Ndiv2 a)
-          | true => f' (Ndiv2 a)
+          | false => f (N.div2 a)
+          | true => f' (N.div2 a)
           end).
   Proof.
     unfold eqm in |- *.
     intros.
-    rewrite <- (H (Ndiv2 a)).
-    rewrite <- (H0 (Ndiv2 a)).
+    rewrite <- (H (N.div2 a)).
+    rewrite <- (H0 (N.div2 a)).
     exact (Map2_semantics_3 m m' a).
   Qed.
 
@@ -201,15 +201,15 @@ Section MapDefs.
    Map :=
     match p with
     | xO p' =>
-        let m := MapPut1 (Ndiv2 a) y (Ndiv2 a') y' p' in
+        let m := MapPut1 (N.div2 a) y (N.div2 a') y' p' in
         match Nbit0 a with
         | false => M2 m M0
         | true => M2 M0 m
         end
     | _ =>
         match Nbit0 a with
-        | false => M2 (M1 (Ndiv2 a) y) (M1 (Ndiv2 a') y')
-        | true => M2 (M1 (Ndiv2 a') y') (M1 (Ndiv2 a) y)
+        | false => M2 (M1 (N.div2 a) y) (M1 (N.div2 a') y')
+        | true => M2 (M1 (N.div2 a') y') (M1 (N.div2 a) y)
         end
     end.
 
@@ -242,7 +242,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_2 :
    forall (m m' m'':Map) (a:ad),
      MapGet (if Nbit0 a then M2 m m' else M2 m' m'') a =
-     MapGet m' (Ndiv2 a).
+     MapGet m' (N.div2 a).
   Proof.
     intros. rewrite MapGet_if_commute. apply MapGet_M2_bit_0.
   Qed.
@@ -271,8 +271,8 @@ Section MapDefs.
 
   Lemma MapGet_M2_both_None :
    forall (m m':Map) (a:ad),
-     MapGet m (Ndiv2 a) = None ->
-     MapGet m' (Ndiv2 a) = None -> MapGet (M2 m m') a = None.
+     MapGet m (N.div2 a) = None ->
+     MapGet m' (N.div2 a) = None -> MapGet (M2 m m') a = None.
   Proof.
     intros. rewrite (Map2_semantics_3 m m' a). 
     case (Nbit0 a); assumption.
@@ -281,8 +281,8 @@ Section MapDefs.
   Lemma MapPut1_semantics_3 :
    forall (p:positive) (a a' a0:ad) (y y':A),
      Nxor a a' = Npos p ->
-     Neqb a a0 = false ->
-     Neqb a' a0 = false -> MapGet (MapPut1 a y a' y' p) a0 = None.
+     N.eqb a a0 = false ->
+     N.eqb a' a0 = false -> MapGet (MapPut1 a y a' y' p) a0 = None.
   Proof.
     simple induction p. intros. unfold MapPut1 in |- *. elim (Nneq_elim a a0 H1). intro. rewrite H3. rewrite if_negb.
     rewrite MapGet_M2_bit_0_2. apply M1_semantics_2. apply Ndiv2_bit_neq. assumption.
@@ -297,7 +297,7 @@ Section MapDefs.
     rewrite MapGet_M2_bit_0_2. reflexivity.
     intro. elim (Nneq_elim a' a0 H2). intro. rewrite (Nsame_bit0 a a' p0 H0). rewrite H4.
     rewrite if_negb. rewrite MapGet_M2_bit_0_2. reflexivity.
-    intro. cut (Nxor (Ndiv2 a) (Ndiv2 a') = Npos p0). intro.
+    intro. cut (Nxor (N.div2 a) (N.div2 a') = Npos p0). intro.
     case (Nbit0 a); apply MapGet_M2_both_None; trivial; apply H;
      assumption.
     rewrite <- Nxor_div2. rewrite H0. reflexivity.
@@ -317,13 +317,13 @@ Section MapDefs.
      Nxor a a' = Npos p ->
      eqm (MapGet (MapPut1 a y a' y' p))
        (fun a0:ad =>
-          if Neqb a a0
+          if N.eqb a a0
           then Some y
-          else if Neqb a' a0 then Some y' else None).
+          else if N.eqb a' a0 then Some y' else None).
   Proof.
-    unfold eqm in |- *. intros. elim (sumbool_of_bool (Neqb a a0)). intro H0. rewrite H0.
+    unfold eqm in |- *. intros. elim (sumbool_of_bool (N.eqb a a0)). intro H0. rewrite H0.
     rewrite <- (Neqb_complete _ _ H0). exact (MapPut1_semantics_1 p a a' y y' H).
-    intro H0. rewrite H0. elim (sumbool_of_bool (Neqb a' a0)). intro H1.
+    intro H0. rewrite H0. elim (sumbool_of_bool (N.eqb a' a0)). intro H1.
     rewrite <- (Neqb_complete _ _ H1). rewrite (Neqb_correct a').
     exact (MapPut1_semantics_2 p a a' y y' H).
     intro H1. rewrite H1. exact (MapPut1_semantics_3 p a a' a0 y y' H H0 H1).
@@ -334,12 +334,12 @@ Section MapDefs.
      Nxor a a' = Npos p ->
      eqm (MapGet (MapPut1 a y a' y' p))
        (fun a0:ad =>
-          if Neqb a' a0
+          if N.eqb a' a0
           then Some y'
-          else if Neqb a a0 then Some y else None).
+          else if N.eqb a a0 then Some y else None).
   Proof.
     unfold eqm in |- *. intros. rewrite (MapPut1_semantics p a a' y y' H a0).
-    elim (sumbool_of_bool (Neqb a a0)). intro H0. rewrite H0.
+    elim (sumbool_of_bool (N.eqb a a0)). intro H0. rewrite H0.
     rewrite <- (Neqb_complete a a0 H0). rewrite (Neqb_comm a' a).
     rewrite (Nxor_eq_false a a' p H). reflexivity.
     intro H0. rewrite H0. reflexivity.
@@ -374,7 +374,7 @@ Section MapDefs.
   Lemma MapPut_semantics_2_1 :
    forall (a:ad) (y y':A) (a0:ad),
      MapGet (MapPut (M1 a y) a y') a0 =
-     (if Neqb a a0 then Some y' else None).
+     (if N.eqb a a0 then Some y' else None).
   Proof.
     simpl in |- *. intros. rewrite (Nxor_nilpotent a). trivial.
   Qed.
@@ -383,12 +383,12 @@ Section MapDefs.
    forall (a a':ad) (y y':A) (a0 a'':ad),
      Nxor a a' = a'' ->
      MapGet (MapPut (M1 a y) a' y') a0 =
-     (if Neqb a' a0 then Some y' else if Neqb a a0 then Some y else None).
+     (if N.eqb a' a0 then Some y' else if N.eqb a a0 then Some y else None).
   Proof.
     simple induction a''. intro. rewrite (Nxor_eq _ _ H). rewrite MapPut_semantics_2_1.
-    case (Neqb a' a0); trivial.
+    case (N.eqb a' a0); trivial.
     intros. simpl in |- *. rewrite H. rewrite (MapPut1_semantics p a a' y y' H a0).
-    elim (sumbool_of_bool (Neqb a a0)). intro H0. rewrite H0. rewrite <- (Neqb_complete _ _ H0).
+    elim (sumbool_of_bool (N.eqb a a0)). intro H0. rewrite H0. rewrite <- (Neqb_complete _ _ H0).
     rewrite (Neqb_comm a' a). rewrite (Nxor_eq_false _ _ _ H). reflexivity.
     intro H0. rewrite H0. reflexivity.
   Qed.
@@ -396,7 +396,7 @@ Section MapDefs.
   Lemma MapPut_semantics_2 :
    forall (a a':ad) (y y':A) (a0:ad),
      MapGet (MapPut (M1 a y) a' y') a0 =
-     (if Neqb a' a0 then Some y' else if Neqb a a0 then Some y else None).
+     (if N.eqb a' a0 then Some y' else if N.eqb a a0 then Some y else None).
   Proof.
     intros. apply MapPut_semantics_2_2 with (a'' := Nxor a a'); trivial.
   Qed.
@@ -405,8 +405,8 @@ Section MapDefs.
    forall (m m':Map) (a:ad) (y:A),
      MapPut (M2 m m') a y =
      (if Nbit0 a
-      then M2 m (MapPut m' (Ndiv2 a) y)
-      else M2 (MapPut m (Ndiv2 a) y) m').
+      then M2 m (MapPut m' (N.div2 a) y)
+      else M2 (MapPut m (N.div2 a) y) m').
   Proof.
     simple induction a. trivial.
     simple induction p; trivial.
@@ -415,22 +415,22 @@ Section MapDefs.
   Lemma MapPut_semantics :
    forall (m:Map) (a:ad) (y:A),
      eqm (MapGet (MapPut m a y))
-       (fun a':ad => if Neqb a a' then Some y else MapGet m a').
+       (fun a':ad => if N.eqb a a' then Some y else MapGet m a').
   Proof.
     unfold eqm in |- *. simple induction m. exact MapPut_semantics_1.
     intros. unfold MapGet at 2 in |- *. apply MapPut_semantics_2; assumption.
     intros. rewrite MapPut_semantics_3_1. rewrite (MapGet_M2_bit_0_if m0 m1 a0).
     elim (sumbool_of_bool (Nbit0 a)). intro H1. rewrite H1. rewrite MapGet_M2_bit_0_if.
     elim (sumbool_of_bool (Nbit0 a0)). intro H2. rewrite H2.
-    rewrite (H0 (Ndiv2 a) y (Ndiv2 a0)). elim (sumbool_of_bool (Neqb a a0)).
+    rewrite (H0 (N.div2 a) y (N.div2 a0)). elim (sumbool_of_bool (N.eqb a a0)).
     intro H3. rewrite H3. rewrite (Ndiv2_eq _ _ H3). reflexivity.
     intro H3. rewrite H3. rewrite <- H2 in H1. rewrite (Ndiv2_bit_neq _ _ H3 H1). reflexivity.
     intro H2. rewrite H2. rewrite (Neqb_comm a a0). rewrite (Nbit0_neq a0 a H2 H1).
     reflexivity.
     intro H1. rewrite H1. rewrite MapGet_M2_bit_0_if. elim (sumbool_of_bool (Nbit0 a0)).
     intro H2. rewrite H2. rewrite (Nbit0_neq a a0 H1 H2). reflexivity.
-    intro H2. rewrite H2. rewrite (H (Ndiv2 a) y (Ndiv2 a0)).
-    elim (sumbool_of_bool (Neqb a a0)). intro H3. rewrite H3.
+    intro H2. rewrite H2. rewrite (H (N.div2 a) y (N.div2 a0)).
+    elim (sumbool_of_bool (N.eqb a a0)). intro H3. rewrite H3.
     rewrite (Ndiv2_eq a a0 H3). reflexivity.
     intro H3. rewrite H3. rewrite <- H2 in H1. rewrite (Ndiv2_bit_neq a a0 H3 H1). reflexivity.
   Qed.
@@ -458,8 +458,8 @@ Section MapDefs.
    forall (m m':Map) (a:ad) (y:A),
      MapPut_behind (M2 m m') a y =
      (if Nbit0 a
-      then M2 m (MapPut_behind m' (Ndiv2 a) y)
-      else M2 (MapPut_behind m (Ndiv2 a) y) m').
+      then M2 m (MapPut_behind m' (N.div2 a) y)
+      else M2 (MapPut_behind m (N.div2 a) y) m').
   Proof.
     simple induction a. trivial.
     simple induction p; trivial.
@@ -467,12 +467,12 @@ Section MapDefs.
 
   Lemma MapPut_behind_as_before_1 :
    forall a a' a0:ad,
-     Neqb a' a0 = false ->
+     N.eqb a' a0 = false ->
      forall y y':A,
        MapGet (MapPut (M1 a y) a' y') a0 =
        MapGet (MapPut_behind (M1 a y) a' y') a0.
   Proof.
-    intros a a' a0. simpl in |- *. intros H y y'. elim (Ndiscr (Nxor a a')). intro H0. elim H0.
+    intros a a' a0. simpl in |- *. intros H y y'. elim (N.discr (Nxor a a')). intro H0. elim H0.
     intros p H1. rewrite H1. reflexivity.
     intro H0. rewrite H0. rewrite (Nxor_eq _ _ H0). rewrite (M1_semantics_2 a' a0 y H).
     exact (M1_semantics_2 a' a0 y' H).
@@ -480,7 +480,7 @@ Section MapDefs.
 
   Lemma MapPut_behind_as_before :
    forall (m:Map) (a:ad) (y:A) (a0:ad),
-     Neqb a a0 = false ->
+     N.eqb a a0 = false ->
      MapGet (MapPut m a y) a0 = MapGet (MapPut_behind m a y) a0.
   Proof.
     simple induction m. trivial.
@@ -504,15 +504,15 @@ Section MapDefs.
      end.
   Proof.
     simple induction m. simpl in |- *. intros. rewrite (Neqb_correct a). reflexivity.
-    intros. elim (Ndiscr (Nxor a a1)). intro H. elim H. intros p H0. simpl in |- *.
+    intros. elim (N.discr (Nxor a a1)). intro H. elim H. intros p H0. simpl in |- *.
     rewrite H0. rewrite (Nxor_eq_false a a1 p). exact (MapPut1_semantics_2 p a a1 a0 y H0).
     assumption.
     intro H. simpl in |- *. rewrite H. rewrite <- (Nxor_eq _ _ H). rewrite (Neqb_correct a).
     exact (M1_semantics_1 a a0).
     intros. rewrite MapPut_behind_semantics_3_1. rewrite (MapGet_M2_bit_0_if m0 m1 a).
     elim (sumbool_of_bool (Nbit0 a)). intro H1. rewrite H1. rewrite (MapGet_M2_bit_0_1 a H1).
-    exact (H0 (Ndiv2 a) y).
-    intro H1. rewrite H1. rewrite (MapGet_M2_bit_0_0 a H1). exact (H (Ndiv2 a) y).
+    exact (H0 (N.div2 a) y).
+    intro H1. rewrite H1. rewrite (MapGet_M2_bit_0_0 a H1). exact (H (N.div2 a) y).
   Qed.
 
   Lemma MapPut_behind_semantics :
@@ -521,10 +521,10 @@ Section MapDefs.
        (fun a':ad =>
           match MapGet m a' with
           | Some y' => Some y'
-          | _ => if Neqb a a' then Some y else None
+          | _ => if N.eqb a a' then Some y else None
           end).
   Proof.
-    unfold eqm in |- *. intros. elim (sumbool_of_bool (Neqb a a0)). intro H. rewrite H.
+    unfold eqm in |- *. intros. elim (sumbool_of_bool (N.eqb a a0)). intro H. rewrite H.
     rewrite (Neqb_complete _ _ H). apply MapPut_behind_new.
     intro H. rewrite H. rewrite <- (MapPut_behind_as_before m a y a0 H).
     rewrite (MapPut_semantics m a y a0). rewrite H. case (MapGet m a0); trivial.
@@ -534,7 +534,7 @@ Section MapDefs.
     match m, m' with
     | M0, M0 => M0
     | M0, M1 a y => M1 (Ndouble_plus_one a) y
-    | M1 a y, M0 => M1 (Ndouble a) y
+    | M1 a y, M0 => M1 (N.double a) y
     | _, _ => M2 m m'
     end.
 
@@ -546,28 +546,28 @@ Section MapDefs.
     intros a0 y. simpl in |- *. rewrite (Nodd_not_double a H a0). reflexivity.
     intros m1 m2. unfold makeM2 in |- *. rewrite MapGet_M2_bit_0_1. reflexivity.
     assumption.
-    case m. intros a0 y. simpl in |- *. elim (sumbool_of_bool (Neqb a0 (Ndiv2 a))).
+    case m. intros a0 y. simpl in |- *. elim (sumbool_of_bool (N.eqb a0 (N.div2 a))).
     intro H0. rewrite H0. rewrite (Neqb_complete _ _ H0). rewrite (Ndiv2_double_plus_one a H).
     rewrite (Neqb_correct a). reflexivity.
-    intro H0. rewrite H0. rewrite (Neqb_comm a0 (Ndiv2 a)) in H0.
+    intro H0. rewrite H0. rewrite (Neqb_comm a0 (N.div2 a)) in H0.
     rewrite (Nnot_div2_not_double_plus_one a a0 H0). reflexivity.
     intros a0 y0 a1 y1. unfold makeM2 in |- *. rewrite MapGet_M2_bit_0_1. reflexivity.
     assumption.
     intros m1 m2 a0 y. unfold makeM2 in |- *. rewrite MapGet_M2_bit_0_1. reflexivity.
     assumption.
     intros m1 m2. unfold makeM2 in |- *.
-    cut (MapGet (M2 m (M2 m1 m2)) a = MapGet (M2 m1 m2) (Ndiv2 a)). 
+    cut (MapGet (M2 m (M2 m1 m2)) a = MapGet (M2 m1 m2) (N.div2 a)). 
     case m; trivial.
     exact (MapGet_M2_bit_0_1 a H m (M2 m1 m2)).
     intro H. rewrite (MapGet_M2_bit_0_0 a H m m'). case m. case m'. reflexivity.
     intros a0 y. simpl in |- *. rewrite (Neven_not_double_plus_one a H a0). reflexivity.
     intros m1 m2. unfold makeM2 in |- *. rewrite MapGet_M2_bit_0_0. reflexivity.
     assumption.
-    case m'. intros a0 y. simpl in |- *. elim (sumbool_of_bool (Neqb a0 (Ndiv2 a))). intro H0.
+    case m'. intros a0 y. simpl in |- *. elim (sumbool_of_bool (N.eqb a0 (N.div2 a))). intro H0.
     rewrite H0. rewrite (Neqb_complete _ _ H0). rewrite (Ndiv2_double a H).
     rewrite (Neqb_correct a). reflexivity.
-    intro H0. rewrite H0. rewrite (Neqb_comm (Ndouble a0) a).
-    rewrite (Neqb_comm a0 (Ndiv2 a)) in H0. rewrite (Nnot_div2_not_double a a0 H0).
+    intro H0. rewrite H0. rewrite (Neqb_comm (N.double a0) a).
+    rewrite (Neqb_comm a0 (N.div2 a)) in H0. rewrite (Nnot_div2_not_double a a0 H0).
     reflexivity.
     intros a0 y0 a1 y1. unfold makeM2 in |- *. rewrite MapGet_M2_bit_0_0. reflexivity.
     assumption.
@@ -580,53 +580,53 @@ Section MapDefs.
     match m with
     | M0 => fun _:ad => M0
     | M1 a y =>
-        fun a':ad => match Neqb a a' with
+        fun a':ad => match N.eqb a a' with
                      | true => M0
                      | false => m
                      end
     | M2 m1 m2 =>
         fun a:ad =>
           if Nbit0 a
-          then makeM2 m1 (MapRemove m2 (Ndiv2 a))
-          else makeM2 (MapRemove m1 (Ndiv2 a)) m2
+          then makeM2 m1 (MapRemove m2 (N.div2 a))
+          else makeM2 (MapRemove m1 (N.div2 a)) m2
     end.
 
   Lemma MapRemove_semantics :
    forall (m:Map) (a:ad),
      eqm (MapGet (MapRemove m a))
-       (fun a':ad => if Neqb a a' then None else MapGet m a').
+       (fun a':ad => if N.eqb a a' then None else MapGet m a').
   Proof.
-    unfold eqm in |- *. simple induction m. simpl in |- *. intros. case (Neqb a a0); trivial.
-    intros. simpl in |- *. elim (sumbool_of_bool (Neqb a1 a2)). intro H. rewrite H.
-    elim (sumbool_of_bool (Neqb a a1)). intro H0. rewrite H0. reflexivity.
+    unfold eqm in |- *. simple induction m. simpl in |- *. intros. case (N.eqb a a0); trivial.
+    intros. simpl in |- *. elim (sumbool_of_bool (N.eqb a1 a2)). intro H. rewrite H.
+    elim (sumbool_of_bool (N.eqb a a1)). intro H0. rewrite H0. reflexivity.
     intro H0. rewrite H0. rewrite (Neqb_complete _ _ H) in H0. exact (M1_semantics_2 a a2 a0 H0).
-    intro H. elim (sumbool_of_bool (Neqb a a1)). intro H0. rewrite H0. rewrite H.
+    intro H. elim (sumbool_of_bool (N.eqb a a1)). intro H0. rewrite H0. rewrite H.
     rewrite <- (Neqb_complete _ _ H0) in H. rewrite H. reflexivity.
     intro H0. rewrite H0. rewrite H. reflexivity.
     intros. change
    (MapGet
       (if Nbit0 a
-       then makeM2 m0 (MapRemove m1 (Ndiv2 a))
-       else makeM2 (MapRemove m0 (Ndiv2 a)) m1) a0 =
-    (if Neqb a a0 then None else MapGet (M2 m0 m1) a0)) 
+       then makeM2 m0 (MapRemove m1 (N.div2 a))
+       else makeM2 (MapRemove m0 (N.div2 a)) m1) a0 =
+    (if N.eqb a a0 then None else MapGet (M2 m0 m1) a0)) 
   in |- *.
     elim (sumbool_of_bool (Nbit0 a)). intro H1. rewrite H1.
-    rewrite (makeM2_M2 m0 (MapRemove m1 (Ndiv2 a)) a0). elim (sumbool_of_bool (Nbit0 a0)).
-    intro H2. rewrite MapGet_M2_bit_0_1. rewrite (H0 (Ndiv2 a) (Ndiv2 a0)).
-    elim (sumbool_of_bool (Neqb a a0)). intro H3. rewrite H3. rewrite (Ndiv2_eq _ _ H3).
+    rewrite (makeM2_M2 m0 (MapRemove m1 (N.div2 a)) a0). elim (sumbool_of_bool (Nbit0 a0)).
+    intro H2. rewrite MapGet_M2_bit_0_1. rewrite (H0 (N.div2 a) (N.div2 a0)).
+    elim (sumbool_of_bool (N.eqb a a0)). intro H3. rewrite H3. rewrite (Ndiv2_eq _ _ H3).
     reflexivity.
     intro H3. rewrite H3. rewrite <- H2 in H1. rewrite (Ndiv2_bit_neq _ _ H3 H1).
     rewrite (MapGet_M2_bit_0_1 a0 H2 m0 m1). reflexivity.
     assumption.
-    intro H2. rewrite (MapGet_M2_bit_0_0 a0 H2 m0 (MapRemove m1 (Ndiv2 a))).
+    intro H2. rewrite (MapGet_M2_bit_0_0 a0 H2 m0 (MapRemove m1 (N.div2 a))).
     rewrite (Neqb_comm a a0). rewrite (Nbit0_neq _ _ H2 H1).
     rewrite (MapGet_M2_bit_0_0 a0 H2 m0 m1). reflexivity.
-    intro H1. rewrite H1. rewrite (makeM2_M2 (MapRemove m0 (Ndiv2 a)) m1 a0).
+    intro H1. rewrite H1. rewrite (makeM2_M2 (MapRemove m0 (N.div2 a)) m1 a0).
     elim (sumbool_of_bool (Nbit0 a0)). intro H2. rewrite MapGet_M2_bit_0_1.
     rewrite (MapGet_M2_bit_0_1 a0 H2 m0 m1). rewrite (Nbit0_neq a a0 H1 H2). reflexivity.
     assumption.
-    intro H2. rewrite MapGet_M2_bit_0_0. rewrite (H (Ndiv2 a) (Ndiv2 a0)).
-    rewrite (MapGet_M2_bit_0_0 a0 H2 m0 m1). elim (sumbool_of_bool (Neqb a a0)). intro H3.
+    intro H2. rewrite MapGet_M2_bit_0_0. rewrite (H (N.div2 a) (N.div2 a0)).
+    rewrite (MapGet_M2_bit_0_0 a0 H2 m0 m1). elim (sumbool_of_bool (N.eqb a a0)). intro H3.
     rewrite H3. rewrite (Ndiv2_eq _ _ H3). reflexivity.
     intro H3. rewrite H3. rewrite <- H2 in H1. rewrite (Ndiv2_bit_neq _ _ H3 H1). reflexivity.
     assumption.
@@ -665,12 +665,12 @@ Section MapDefs.
     intros. simpl in |- *. rewrite (MapPut_behind_semantics m' a a0 a1). reflexivity.
     simple induction m'. trivial.
     intros. unfold MapMerge in |- *. rewrite (MapPut_semantics (M2 m0 m1) a a0 a1).
-    elim (sumbool_of_bool (Neqb a a1)). intro H1. rewrite H1. rewrite (Neqb_complete _ _ H1).
+    elim (sumbool_of_bool (N.eqb a a1)). intro H1. rewrite H1. rewrite (Neqb_complete _ _ H1).
     rewrite (M1_semantics_1 a1 a0). reflexivity.
     intro H1. rewrite H1. rewrite (M1_semantics_2 a a1 a0 H1). reflexivity.
     intros. cut (MapMerge (M2 m0 m1) (M2 m2 m3) = M2 (MapMerge m0 m2) (MapMerge m1 m3)).
-    intro. rewrite H3. rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (Ndiv2 a)).
-    rewrite (H m2 (Ndiv2 a)). rewrite (MapGet_M2_bit_0_if m2 m3 a).
+    intro. rewrite H3. rewrite MapGet_M2_bit_0_if. rewrite (H0 m3 (N.div2 a)).
+    rewrite (H m2 (N.div2 a)). rewrite (MapGet_M2_bit_0_if m2 m3 a).
     rewrite (MapGet_M2_bit_0_if m0 m1 a). case (Nbit0 a); trivial.
     reflexivity.
   Qed.
@@ -705,16 +705,16 @@ Section MapDefs.
   Proof.
     unfold eqm in |- *. simple induction m. simple induction m'; reflexivity.
     simple induction m'. reflexivity.
-    unfold MapDelta in |- *. intros. elim (sumbool_of_bool (Neqb a a1)). intro H.
+    unfold MapDelta in |- *. intros. elim (sumbool_of_bool (N.eqb a a1)). intro H.
     rewrite <- (Neqb_complete _ _ H). rewrite (M1_semantics_1 a a2).
     rewrite (M1_semantics_1 a a0). simpl in |- *. rewrite (Neqb_correct a). reflexivity.
     intro H. rewrite (M1_semantics_2 a a1 a0 H). rewrite (Neqb_comm a a1) in H.
     rewrite (M1_semantics_2 a1 a a2 H). rewrite (MapPut_semantics (M1 a a0) a1 a2 a3).
-    rewrite (MapPut_semantics (M1 a1 a2) a a0 a3). elim (sumbool_of_bool (Neqb a a3)).
+    rewrite (MapPut_semantics (M1 a1 a2) a a0 a3). elim (sumbool_of_bool (N.eqb a a3)).
     intro H0. rewrite H0. rewrite (Neqb_complete _ _ H0) in H. rewrite H.
     rewrite (Neqb_complete _ _ H0). rewrite (M1_semantics_1 a3 a0). reflexivity.
     intro H0. rewrite H0. rewrite (M1_semantics_2 a a3 a0 H0).
-    elim (sumbool_of_bool (Neqb a1 a3)). intro H1. rewrite H1.
+    elim (sumbool_of_bool (N.eqb a1 a3)). intro H1. rewrite H1.
     rewrite (Neqb_complete _ _ H1). exact (M1_semantics_1 a3 a2).
     intro H1. rewrite H1. exact (M1_semantics_2 a1 a3 a2 H1).
     intros. reflexivity.
@@ -724,7 +724,7 @@ Section MapDefs.
     rewrite (makeM2_M2 (MapDelta m2 m0) (MapDelta m3 m1) a).
     rewrite (MapGet_M2_bit_0_if (MapDelta m0 m2) (MapDelta m1 m3) a).
     rewrite (MapGet_M2_bit_0_if (MapDelta m2 m0) (MapDelta m3 m1) a).
-    rewrite (H0 m3 (Ndiv2 a)). rewrite (H m2 (Ndiv2 a)). reflexivity.
+    rewrite (H0 m3 (N.div2 a)). rewrite (H m2 (N.div2 a)). reflexivity.
   Qed.
 
   Lemma MapDelta_semantics_1_1 :
@@ -732,7 +732,7 @@ Section MapDefs.
      MapGet (M1 a y) a0 = None ->
      MapGet m' a0 = None -> MapGet (MapDelta (M1 a y) m') a0 = None.
   Proof.
-    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (Neqb a a0)). intro H1.
+    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (N.eqb a a0)). intro H1.
     rewrite (Neqb_complete _ _ H1) in H. rewrite (M1_semantics_1 a0 y) in H. discriminate H.
     intro H1. case (MapGet m' a).  
     rewrite (MapRemove_semantics m' a a0). rewrite H1. trivial.
@@ -762,7 +762,7 @@ Section MapDefs.
      MapGet (M1 a y) a0 = None ->
      MapGet m' a0 = Some y0 -> MapGet (MapDelta (M1 a y) m') a0 = Some y0.
   Proof.
-    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (Neqb a a0)). intro H1.
+    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (N.eqb a a0)). intro H1.
     rewrite (Neqb_complete _ _ H1) in H. rewrite (M1_semantics_1 a0 y) in H. discriminate H.
     intro H1. case (MapGet m' a).
     rewrite (MapRemove_semantics m' a a0). rewrite H1. trivial.
@@ -774,7 +774,7 @@ Section MapDefs.
      MapGet (M1 a y) a0 = Some y0 ->
      MapGet m' a0 = None -> MapGet (MapDelta (M1 a y) m') a0 = Some y0.
   Proof.
-    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (Neqb a a0)). intro H1.
+    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (N.eqb a a0)). intro H1.
     rewrite (Neqb_complete _ _ H1) in H. rewrite (Neqb_complete _ _ H1).
     rewrite H0. rewrite (MapPut_semantics m' a0 y a0). rewrite (Neqb_correct a0).
     rewrite (M1_semantics_1 a0 y) in H. simple inversion H. assumption.
@@ -804,7 +804,7 @@ Section MapDefs.
      MapGet (M1 a0 y0) a = Some y ->
      MapGet m' a = Some y' -> MapGet (MapDelta (M1 a0 y0) m') a = None.
   Proof.
-    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (Neqb a0 a)). intro H1.
+    intros. unfold MapDelta in |- *. elim (sumbool_of_bool (N.eqb a0 a)). intro H1.
     rewrite (Neqb_complete a0 a H1). rewrite H0. rewrite (MapRemove_semantics m' a a).
     rewrite (Neqb_correct a). reflexivity.
     intro H1. rewrite (M1_semantics_2 a0 a y0 H1) in H. discriminate H.
@@ -822,9 +822,9 @@ Section MapDefs.
     exact (MapDelta_semantics_3_1 a a0 (M2 m0 m1) a1 y' y H2 H1).
     intros. simpl in |- *. rewrite (makeM2_M2 (MapDelta m0 m2) (MapDelta m1 m3) a).
     rewrite MapGet_M2_bit_0_if. elim (sumbool_of_bool (Nbit0 a)). intro H5. rewrite H5.
-    apply (H0 m3 (Ndiv2 a) y y'). rewrite <- (MapGet_M2_bit_0_1 a H5 m0 m1). assumption.
+    apply (H0 m3 (N.div2 a) y y'). rewrite <- (MapGet_M2_bit_0_1 a H5 m0 m1). assumption.
     rewrite <- (MapGet_M2_bit_0_1 a H5 m2 m3). assumption.
-    intro H5. rewrite H5. apply (H m2 (Ndiv2 a) y y').
+    intro H5. rewrite H5. apply (H m2 (N.div2 a) y y').
     rewrite <- (MapGet_M2_bit_0_0 a H5 m0 m1). assumption.
     rewrite <- (MapGet_M2_bit_0_0 a H5 m2 m3). assumption.
   Qed.

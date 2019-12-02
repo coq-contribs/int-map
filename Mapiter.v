@@ -34,7 +34,7 @@ Section MapIter.
     | M0 => None
     | M1 a y => MapSweep2 (pf a) y
     | M2 m m' =>
-        match MapSweep1 (fun a:ad => pf (Ndouble a)) m with
+        match MapSweep1 (fun a:ad => pf (N.double a)) m with
         | Some r => Some r
         | None => MapSweep1 (fun a:ad => pf (Ndouble_plus_one a)) m'
         end
@@ -50,9 +50,9 @@ Section MapIter.
     simpl in |- *. intros a y pf a0 y0. elim (sumbool_of_bool (f (pf a) y)). intro H. unfold MapSweep2 in |- *.
     rewrite H. intro H0. inversion H0. rewrite <- H3. assumption.
     intro H. unfold MapSweep2 in |- *. rewrite H. intro H0. discriminate H0.
-    simpl in |- *. intros. elim (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (Ndouble a0)) m0)).
+    simpl in |- *. intros. elim (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (N.double a0)) m0)).
     intro H2. elim H2. intros r H3. rewrite H3 in H1. inversion H1. rewrite H5 in H3.
-    exact (H (fun a0:ad => pf (Ndouble a0)) a y H3).
+    exact (H (fun a0:ad => pf (N.double a0)) a y H3).
     intro H2. rewrite H2 in H1. exact (H0 (fun a0:ad => pf (Ndouble_plus_one a0)) a y H1).
   Qed.
 
@@ -72,9 +72,9 @@ Section MapIter.
     intro. discriminate H.
     intros m0 H m1 H0 pf a y. simpl in |- *.
     elim
-     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (Ndouble a0)) m0)). intro H1. elim H1.
+     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (N.double a0)) m0)). intro H1. elim H1.
     intros r H2. rewrite H2. intro H3. inversion H3. rewrite H5 in H2.
-    elim (H (fun a0:ad => pf (Ndouble a0)) a y H2). intros a0 H6. split with (Ndouble a0).
+    elim (H (fun a0:ad => pf (N.double a0)) a y H2). intros a0 H6. split with (N.double a0).
     assumption.
     intro H1. rewrite H1. intro H2. elim (H0 (fun a0:ad => pf (Ndouble_plus_one a0)) a y H2).
     intros a0 H3. split with (Ndouble_plus_one a0). assumption.
@@ -92,30 +92,30 @@ Section MapIter.
     reflexivity.
     intro H0. rewrite H0. intro H1. discriminate H1.
     intros. rewrite (MapGet_M2_bit_0_if A m0 m1 (fp a)). elim (sumbool_of_bool (Nbit0 (fp a))).
-    intro H3. rewrite H3. elim (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (Ndouble a0)) m0)).
+    intro H3. rewrite H3. elim (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (N.double a0)) m0)).
     intro H4. simpl in H2. apply
   (H0 (fun a0:ad => pf (Ndouble_plus_one a0))
-     (fun a0:ad => Ndiv2 (fp a0))).
+     (fun a0:ad => N.div2 (fp a0))).
     intro. rewrite H1. apply Ndouble_plus_one_div2.
     elim
-     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (Ndouble a0)) m0)). intro H5. elim H5.
+     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (N.double a0)) m0)). intro H5. elim H5.
     intros r H6. rewrite H6 in H2. inversion H2. rewrite H8 in H6.
-    elim (MapSweep_semantics_2_1 m0 (fun a0:ad => pf (Ndouble a0)) a y H6). intros a0 H9.
-    rewrite H9 in H3. rewrite (H1 (Ndouble a0)) in H3. rewrite (Ndouble_bit0 a0) in H3.
+    elim (MapSweep_semantics_2_1 m0 (fun a0:ad => pf (N.double a0)) a y H6). intros a0 H9.
+    rewrite H9 in H3. rewrite (H1 (N.double a0)) in H3. rewrite (Ndouble_bit0 a0) in H3.
     discriminate H3.
     intro H5. rewrite H5 in H2. assumption.
     intro H4. simpl in H2. rewrite H4 in H2.
     apply
      (H0 (fun a0:ad => pf (Ndouble_plus_one a0))
-        (fun a0:ad => Ndiv2 (fp a0))). intro.
+        (fun a0:ad => N.div2 (fp a0))). intro.
     rewrite H1. apply Ndouble_plus_one_div2.
     assumption.
     intro H3. rewrite H3. simpl in H2.
     elim
-     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (Ndouble a0)) m0)). intro H4. elim H4.
+     (option_sum (ad * A) (MapSweep1 (fun a0:ad => pf (N.double a0)) m0)). intro H4. elim H4.
     intros r H5. rewrite H5 in H2. inversion H2. rewrite H7 in H5.
     apply
-     (H (fun a0:ad => pf (Ndouble a0)) (fun a0:ad => Ndiv2 (fp a0))). intro. rewrite H1.
+     (H (fun a0:ad => pf (N.double a0)) (fun a0:ad => N.div2 (fp a0))). intro. rewrite H1.
     apply Ndouble_div2.
     assumption.
     intro H4. rewrite H4 in H2.
@@ -144,16 +144,16 @@ Section MapIter.
     simple induction m. intros. discriminate H0.
     simpl in |- *. unfold MapSweep2 in |- *. intros a y pf. elim (sumbool_of_bool (f (pf a) y)). intro H.
     rewrite H. intro. discriminate H0.
-    intro H. rewrite H. intros H0 a0 y0. elim (sumbool_of_bool (Neqb a a0)). intro H1. rewrite H1.
+    intro H. rewrite H. intros H0 a0 y0. elim (sumbool_of_bool (N.eqb a a0)). intro H1. rewrite H1.
     intro H2. inversion H2. rewrite <- H4. rewrite <- (Neqb_complete _ _ H1). assumption.
     intro H1. rewrite H1. intro. discriminate H2.
-    intros. simpl in H1. elim (option_sum (ad * A) (MapSweep1 (fun a:ad => pf (Ndouble a)) m0)).
+    intros. simpl in H1. elim (option_sum (ad * A) (MapSweep1 (fun a:ad => pf (N.double a)) m0)).
     intro H3. elim H3. intros r H4. rewrite H4 in H1. discriminate H1.
     intro H3. rewrite H3 in H1. elim (sumbool_of_bool (Nbit0 a)). intro H4.
     rewrite (MapGet_M2_bit_0_1 A a H4 m0 m1) in H2. rewrite <- (Ndiv2_double_plus_one a H4).
-    exact (H0 (fun a:ad => pf (Ndouble_plus_one a)) H1 (Ndiv2 a) y H2).
+    exact (H0 (fun a:ad => pf (Ndouble_plus_one a)) H1 (N.div2 a) y H2).
     intro H4. rewrite (MapGet_M2_bit_0_0 A a H4 m0 m1) in H2. rewrite <- (Ndiv2_double a H4).
-    exact (H (fun a:ad => pf (Ndouble a)) H3 (Ndiv2 a) y H2).
+    exact (H (fun a:ad => pf (N.double a)) H3 (N.div2 a) y H2).
   Qed.
 
   Lemma MapSweep_semantics_3 :
@@ -172,7 +172,7 @@ Section MapIter.
      {a' : ad &  {y' : A | MapSweep1 pf m = Some (a', y')}}.
   Proof.
     simple induction m. intros. discriminate H.
-    intros. elim (sumbool_of_bool (Neqb a a1)). intro H1. split with (pf a1). split with y.
+    intros. elim (sumbool_of_bool (N.eqb a a1)). intro H1. split with (pf a1). split with y.
     rewrite (Neqb_complete _ _ H1). unfold MapSweep1, MapSweep2 in |- *.
     rewrite (Neqb_complete _ _ H1) in H. rewrite (M1_semantics_1 _ a1 a0) in H.
     inversion H. rewrite H0. reflexivity.
@@ -182,14 +182,14 @@ Section MapIter.
     intros. elim (sumbool_of_bool (Nbit0 a)). intro H3.
     rewrite (MapGet_M2_bit_0_1 _ _ H3 m0 m1) in H.
     rewrite <- (Ndiv2_double_plus_one a H3) in H0.
-    elim (X0 (fun a0:ad => pf (Ndouble_plus_one a0)) (Ndiv2 a) y H H0). intros a'' H4. elim H4.
-    intros y'' H5. simpl in |- *. elim (option_sum _ (MapSweep1 (fun a:ad => pf (Ndouble a)) m0)).
+    elim (X0 (fun a0:ad => pf (Ndouble_plus_one a0)) (N.div2 a) y H H0). intros a'' H4. elim H4.
+    intros y'' H5. simpl in |- *. elim (option_sum _ (MapSweep1 (fun a:ad => pf (N.double a)) m0)).
     intro H6. elim H6. intro r. elim r. intros a''' y''' H7. rewrite H7. split with a'''.
     split with y'''. reflexivity.
     intro H6. rewrite H6. split with a''. split with y''. assumption.
     intro H3. rewrite (MapGet_M2_bit_0_0 _ _ H3 m0 m1) in H.
     rewrite <- (Ndiv2_double a H3) in H0.
-    elim (X (fun a0:ad => pf (Ndouble a0)) (Ndiv2 a) y H H0). intros a'' H4. elim H4.
+    elim (X (fun a0:ad => pf (N.double a0)) (N.div2 a) y H H0). intros a'' H4. elim H4.
     intros y'' H5. split with a''. split with y''. simpl in |- *. rewrite H5. reflexivity.
   Qed.
 
@@ -211,7 +211,7 @@ Section MapIter.
     | M0 => M0 B
     | M1 a y => f (pf a) y
     | M2 m1 m2 =>
-        MapMerge B (MapCollect1 f (fun a0:ad => pf (Ndouble a0)) m1)
+        MapMerge B (MapCollect1 f (fun a0:ad => pf (N.double a0)) m1)
           (MapCollect1 f (fun a0:ad => pf (Ndouble_plus_one a0)) m2)
     end.
 
@@ -230,7 +230,7 @@ Section MapIter.
       | M0 => neutral
       | M1 a y => f (pf a) y
       | M2 m1 m2 =>
-          op (MapFold1 f (fun a0:ad => pf (Ndouble a0)) m1)
+          op (MapFold1 f (fun a0:ad => pf (N.double a0)) m1)
             (MapFold1 f (fun a0:ad => pf (Ndouble_plus_one a0)) m2)
       end.
 
@@ -257,7 +257,7 @@ Section MapIter.
       | M0 => (state, neutral)
       | M1 a y => f state (pf a) y
       | M2 m1 m2 =>
-          match MapFold1_state state (fun a0:ad => pf (Ndouble a0)) m1 with
+          match MapFold1_state state (fun a0:ad => pf (N.double a0)) m1 with
           | (state1, x1) =>
               match
                 MapFold1_state state1
@@ -284,19 +284,19 @@ Section MapIter.
       simple induction m. trivial.
       intros. simpl in |- *. apply H.
       intros. simpl in |- *. rewrite
-  (pair_sp _ _ (MapFold1_state state (fun a0:ad => pf (Ndouble a0)) m0))
+  (pair_sp _ _ (MapFold1_state state (fun a0:ad => pf (N.double a0)) m0))
   .
-      rewrite (H g (fun a0:ad => pf (Ndouble a0)) H1 state).
+      rewrite (H g (fun a0:ad => pf (N.double a0)) H1 state).
       rewrite
        (pair_sp _ _
           (MapFold1_state
-             (fst (MapFold1_state state (fun a0:ad => pf (Ndouble a0)) m0))
+             (fst (MapFold1_state state (fun a0:ad => pf (N.double a0)) m0))
              (fun a0:ad => pf (Ndouble_plus_one a0)) m1))
        .
       simpl in |- *.
       rewrite
        (H0 g (fun a0:ad => pf (Ndouble_plus_one a0)) H1
-          (fst (MapFold1_state state (fun a0:ad => pf (Ndouble a0)) m0)))
+          (fst (MapFold1_state state (fun a0:ad => pf (N.double a0)) m0)))
        .
       reflexivity.
     Qed.
@@ -331,7 +331,7 @@ Section MapIter.
     match l with
     | nil => fun _:ad => None
     | (a, y) :: l' =>
-        fun a0:ad => if Neqb a a0 then Some y else alist_semantics l' a0
+        fun a0:ad => if N.eqb a a0 then Some y else alist_semantics l' a0
     end.
 
   Lemma alist_semantics_app :
@@ -343,7 +343,7 @@ Section MapIter.
      end.
   Proof.
     unfold aapp in |- *. simple induction l. trivial.
-    intros. elim a. intros a1 y1. simpl in |- *. case (Neqb a1 a0). reflexivity.
+    intros. elim a. intros a1 y1. simpl in |- *. case (N.eqb a1 a0). reflexivity.
     apply H.
   Qed.
 
@@ -354,21 +354,21 @@ Section MapIter.
           m) a = Some y -> {a' : ad | a = pf a'}.
   Proof.
     simple induction m. simpl in |- *. intros. discriminate H.
-    simpl in |- *. intros a y pf a0 y0. elim (sumbool_of_bool (Neqb (pf a) a0)). intro H. rewrite H.
+    simpl in |- *. intros a y pf a0 y0. elim (sumbool_of_bool (N.eqb (pf a) a0)). intro H. rewrite H.
     intro H0. split with a. rewrite (Neqb_complete _ _ H). reflexivity.
     intro H. rewrite H. intro H0. discriminate H0.
     intros. change
    (alist_semantics
       (aapp
          (MapFold1 alist anil aapp (fun (a0:ad) (y:A) => acons (a0, y) anil)
-            (fun a0:ad => pf (Ndouble a0)) m0)
+            (fun a0:ad => pf (N.double a0)) m0)
          (MapFold1 alist anil aapp (fun (a0:ad) (y:A) => acons (a0, y) anil)
             (fun a0:ad => pf (Ndouble_plus_one a0)) m1)) a = 
     Some y) in H.
     rewrite
      (alist_semantics_app
         (MapFold1 alist anil aapp (fun (a0:ad) (y0:A) => acons (a0, y0) anil)
-           (fun a0:ad => pf (Ndouble a0)) m0)
+           (fun a0:ad => pf (N.double a0)) m0)
         (MapFold1 alist anil aapp (fun (a0:ad) (y0:A) => acons (a0, y0) anil)
            (fun a0:ad => pf (Ndouble_plus_one a0)) m1) a)
       in H.
@@ -377,9 +377,9 @@ Section MapIter.
         (alist_semantics
            (MapFold1 alist anil aapp
               (fun (a0:ad) (y0:A) => acons (a0, y0) anil)
-              (fun a0:ad => pf (Ndouble a0)) m0) a)).
-    intro H2. elim H2. intros y0 H3. elim (X (fun a0:ad => pf (Ndouble a0)) a y0 H3). intros a0 H4.
-    split with (Ndouble a0). assumption.
+              (fun a0:ad => pf (N.double a0)) m0) a)).
+    intro H2. elim H2. intros y0 H3. elim (X (fun a0:ad => pf (N.double a0)) a y0 H3). intros a0 H4.
+    split with (N.double a0). assumption.
     intro H2. rewrite H2 in H. elim (X0 (fun a0:ad => pf (Ndouble_plus_one a0)) a y H).
     intros a0 H3. split with (Ndouble_plus_one a0). assumption.
   Qed.
@@ -388,9 +388,9 @@ Section MapIter.
     forall a0 a1:ad, pf a0 = pf a1 -> a0 = a1.
 
   Lemma ad_comp_double_inj :
-   forall pf:ad -> ad, ad_inj pf -> ad_inj (fun a0:ad => pf (Ndouble a0)).
+   forall pf:ad -> ad, ad_inj pf -> ad_inj (fun a0:ad => pf (N.double a0)).
   Proof.
-    unfold ad_inj in |- *. intros. apply Ndouble_inj. exact (H _ _ H0).
+    unfold ad_inj in |- *. intros. apply N.double_inj. exact (H _ _ H0).
   Qed.
 
   Lemma ad_comp_double_plus_un_inj :
@@ -410,9 +410,9 @@ Section MapIter.
             pf m) (pf a).
   Proof.
     simple induction m. trivial.
-    simpl in |- *. intros. elim (sumbool_of_bool (Neqb a a1)). intro H0. rewrite H0.
+    simpl in |- *. intros. elim (sumbool_of_bool (N.eqb a a1)). intro H0. rewrite H0.
     rewrite (Neqb_complete _ _ H0). rewrite (Neqb_correct (pf a1)). reflexivity.
-    intro H0. rewrite H0. elim (sumbool_of_bool (Neqb (pf a) (pf a1))). intro H1.
+    intro H0. rewrite H0. elim (sumbool_of_bool (N.eqb (pf a) (pf a1))). intro H1.
     rewrite (H a a1 (Neqb_complete _ _ H1)) in H0. rewrite (Neqb_correct a1) in H0.
     discriminate H0.
     intro H1. rewrite H1. reflexivity.
@@ -421,7 +421,7 @@ Section MapIter.
     alist_semantics
       (aapp
          (MapFold1 alist anil aapp (fun (a0:ad) (y:A) => acons (a0, y) anil)
-            (fun a0:ad => pf (Ndouble a0)) m0)
+            (fun a0:ad => pf (N.double a0)) m0)
          (MapFold1 alist anil aapp (fun (a0:ad) (y:A) => acons (a0, y) anil)
             (fun a0:ad => pf (Ndouble_plus_one a0)) m1)) (
       pf a)) in |- *.
@@ -429,7 +429,7 @@ Section MapIter.
     elim (Ndouble_or_double_plus_un a). intro H2. elim H2. intros a0 H3. rewrite H3.
     rewrite (Ndouble_bit0 a0).
     rewrite <-
-     (H (fun a1:ad => pf (Ndouble a1)) (ad_comp_double_inj pf H1) a0)
+     (H (fun a1:ad => pf (N.double a1)) (ad_comp_double_inj pf H1) a0)
      .
     rewrite Ndouble_div2. case (MapGet A m0 a0); trivial.
     elim
@@ -438,15 +438,15 @@ Section MapIter.
            (MapFold1 alist anil aapp
               (fun (a1:ad) (y:A) => acons (a1, y) anil)
               (fun a1:ad => pf (Ndouble_plus_one a1)) m1)
-           (pf (Ndouble a0)))).
+           (pf (N.double a0)))).
     intro H4. elim H4. intros y H5.
     elim
      (alist_of_Map_semantics_1_1 m1 (fun a1:ad => pf (Ndouble_plus_one a1))
-        (pf (Ndouble a0)) y H5).
-    intros a1 H6. cut (Nbit0 (Ndouble a0) = Nbit0 (Ndouble_plus_one a1)).
+        (pf (N.double a0)) y H5).
+    intros a1 H6. cut (Nbit0 (N.double a0) = Nbit0 (Ndouble_plus_one a1)).
     intro. rewrite (Ndouble_bit0 a0) in H7. rewrite (Ndouble_plus_one_bit0 a1) in H7.
     discriminate H7.
-    rewrite (H1 (Ndouble a0) (Ndouble_plus_one a1) H6). reflexivity.
+    rewrite (H1 (N.double a0) (Ndouble_plus_one a1) H6). reflexivity.
     intro H4. rewrite H4. reflexivity.
     intro H2. elim H2. intros a0 H3. rewrite H3. rewrite (Ndouble_plus_one_bit0 a0).
     rewrite <-
@@ -458,16 +458,16 @@ Section MapIter.
         (alist_semantics
            (MapFold1 alist anil aapp
               (fun (a1:ad) (y:A) => acons (a1, y) anil)
-              (fun a1:ad => pf (Ndouble a1)) m0)
+              (fun a1:ad => pf (N.double a1)) m0)
            (pf (Ndouble_plus_one a0)))).
     intro H4. elim H4. intros y H5.
     elim
-     (alist_of_Map_semantics_1_1 m0 (fun a1:ad => pf (Ndouble a1))
+     (alist_of_Map_semantics_1_1 m0 (fun a1:ad => pf (N.double a1))
         (pf (Ndouble_plus_one a0)) y H5).
-    intros a1 H6. cut (Nbit0 (Ndouble_plus_one a0) = Nbit0 (Ndouble a1)).
+    intros a1 H6. cut (Nbit0 (Ndouble_plus_one a0) = Nbit0 (N.double a1)).
     intro H7. rewrite (Ndouble_plus_one_bit0 a0) in H7. rewrite (Ndouble_bit0 a1) in H7.
     discriminate H7.
-    rewrite (H1 (Ndouble_plus_one a0) (Ndouble a1) H6). reflexivity.
+    rewrite (H1 (Ndouble_plus_one a0) (N.double a1) H6). reflexivity.
     intro H4. rewrite H4. reflexivity.
   Qed.
 
@@ -489,7 +489,7 @@ Section MapIter.
    forall l:alist, eqm A (alist_semantics l) (MapGet A (Map_of_alist l)).
   Proof.
     unfold eqm in |- *. simple induction l. trivial.
-    intros r l0 H a. elim r. intros a0 y0. simpl in |- *. elim (sumbool_of_bool (Neqb a0 a)).
+    intros r l0 H a. elim r. intros a0 y0. simpl in |- *. elim (sumbool_of_bool (N.eqb a0 a)).
     intro H0. rewrite H0. rewrite (Neqb_complete _ _ H0).
     rewrite (MapPut_semantics A (Map_of_alist l0) a y0 a). rewrite (Neqb_correct a).
     reflexivity.
@@ -549,7 +549,7 @@ Section MapIter.
     simple induction m. trivial.
     intros. simpl in |- *. rewrite H1. reflexivity.
     intros. simpl in |- *. rewrite (fold_right_aapp M neutral op H H0 f).
-    rewrite (H2 (fun a0:ad => pf (Ndouble a0))). rewrite (H3 (fun a0:ad => pf (Ndouble_plus_one a0))).
+    rewrite (H2 (fun a0:ad => pf (N.double a0))). rewrite (H3 (fun a0:ad => pf (Ndouble_plus_one a0))).
     reflexivity.
   Qed.
 

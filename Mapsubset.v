@@ -448,10 +448,10 @@ Section MapDisjointExtra.
   Proof.
     unfold MapDisjoint, in_dom in |- *. intros. elim (option_sum _ (MapGet A m0 a)). intro H2.
     elim H2. intros y H3. elim (option_sum _ (MapGet B m2 a)). intro H4. elim H4.
-    intros y' H5. apply (H (Ndouble a)).
-    rewrite (MapGet_M2_bit_0_0 _ (Ndouble a) (Ndouble_bit0 a) m0 m1).
+    intros y' H5. apply (H (N.double a)).
+    rewrite (MapGet_M2_bit_0_0 _ (N.double a) (Ndouble_bit0 a) m0 m1).
     rewrite (Ndouble_div2 a). rewrite H3. reflexivity.
-    rewrite (MapGet_M2_bit_0_0 _ (Ndouble a) (Ndouble_bit0 a) m2 m3).
+    rewrite (MapGet_M2_bit_0_0 _ (N.double a) (Ndouble_bit0 a) m2 m3).
     rewrite (Ndouble_div2 a). rewrite H5. reflexivity.
     intro H4. rewrite H4 in H1. discriminate H1.
     intro H2. rewrite H2 in H0. discriminate H0.
@@ -483,9 +483,9 @@ Section MapDisjointExtra.
   Proof.
     unfold MapDisjoint, in_dom in |- *. intros. elim (sumbool_of_bool (Nbit0 a)). intro H3.
     rewrite (MapGet_M2_bit_0_1 A a H3 m0 m1) in H1.
-    rewrite (MapGet_M2_bit_0_1 B a H3 m2 m3) in H2. exact (H0 (Ndiv2 a) H1 H2).
+    rewrite (MapGet_M2_bit_0_1 B a H3 m2 m3) in H2. exact (H0 (N.div2 a) H1 H2).
     intro H3. rewrite (MapGet_M2_bit_0_0 A a H3 m0 m1) in H1.
-    rewrite (MapGet_M2_bit_0_0 B a H3 m2 m3) in H2. exact (H (Ndiv2 a) H1 H2).
+    rewrite (MapGet_M2_bit_0_0 B a H3 m2 m3) in H2. exact (H (N.div2 a) H1 H2).
   Qed.
 
   Lemma MapDisjoint_M1_l :

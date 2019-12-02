@@ -173,7 +173,7 @@ Section LSort.
     intro r. elim r. intros a y l0 H. simple induction n. simpl in |- *. intro. split with y.
     rewrite (Neqb_correct a). reflexivity.
     intros. elim (H _ (le_S_n _ _ H0)). intros y0 H2.
-    elim (sumbool_of_bool (Neqb a (alist_nth_ad n0 l0))). intro H3. split with y.
+    elim (sumbool_of_bool (N.eqb a (alist_nth_ad n0 l0))). intro H3. split with y.
     rewrite (Neqb_complete _ _ H3). simpl in |- *. rewrite (Neqb_correct (alist_nth_ad n0 l0)).
     reflexivity.
     intro H3. split with y0. simpl in |- *. rewrite H3. assumption.
@@ -194,7 +194,7 @@ Section LSort.
   Definition ad_monotonic (pf:ad -> ad) :=
     forall a a':ad, Nless a a' = true -> Nless (pf a) (pf a') = true.
 
-  Lemma Ndouble_monotonic : ad_monotonic Ndouble.
+  Lemma Ndouble_monotonic : ad_monotonic N.double.
   Proof.
     unfold ad_monotonic in |- *. intros. rewrite Nless_def_1. assumption.
   Qed.
@@ -214,7 +214,7 @@ Section LSort.
 
   Lemma ad_comp_double_monotonic :
    forall pf:ad -> ad,
-     ad_monotonic pf -> ad_monotonic (fun a0:ad => pf (Ndouble a0)).
+     ad_monotonic pf -> ad_monotonic (fun a0:ad => pf (N.double a0)).
   Proof.
     intros. apply ad_comp_monotonic. assumption.
     exact Ndouble_monotonic.
@@ -239,15 +239,15 @@ Section LSort.
     intros. simpl in |- *. apply alist_sorted_1_imp_2. apply alist_sorted_imp_1. reflexivity.
     intros. simpl in |- *. apply alist_conc_sorted.
     exact
-     (H (fun a0:ad => pf (Ndouble a0)) (ad_comp_double_monotonic pf H1)).
+     (H (fun a0:ad => pf (N.double a0)) (ad_comp_double_monotonic pf H1)).
     exact
      (H0 (fun a0:ad => pf (Ndouble_plus_one a0))
         (ad_comp_double_plus_un_monotonic pf H1)).
     intros. elim
-  (alist_of_Map_nth_ad m0 (fun a0:ad => pf (Ndouble a0))
+  (alist_of_Map_nth_ad m0 (fun a0:ad => pf (N.double a0))
      (MapFold1 A (alist A) (anil A) (aapp A)
         (fun (a0:ad) (y:A) => acons A (a0, y) (anil A))
-        (fun a0:ad => pf (Ndouble a0)) m0) (refl_equal _) n H2).
+        (fun a0:ad => pf (N.double a0)) m0) (refl_equal _) n H2).
     intros a H4. rewrite H4. elim
   (alist_of_Map_nth_ad m1 (fun a0:ad => pf (Ndouble_plus_one a0))
      (MapFold1 A (alist A) (anil A) (aapp A)
@@ -284,16 +284,16 @@ Section LSort.
      alist_sorted_2 ((a', y) :: l) ->
      alist_semantics A ((a', y) :: l) a = None.
   Proof.
-    simple induction l. intros. simpl in |- *. elim (sumbool_of_bool (Neqb a' a)). intro H1.
+    simple induction l. intros. simpl in |- *. elim (sumbool_of_bool (N.eqb a' a)). intro H1.
     rewrite (Neqb_complete _ _ H1) in H. rewrite (Nless_not_refl a) in H. discriminate H.
     intro H1. rewrite H1. reflexivity.
     intro r. elim r. intros a y l0 H a0 a1 y0 H0 H1.
     change
-      (match Neqb a1 a0 with
+      (match N.eqb a1 a0 with
        | true => Some y0
        | false => alist_semantics A ((a, y) :: l0) a0
        end = None) in |- *.
-    elim (sumbool_of_bool (Neqb a1 a0)). intro H2. rewrite (Neqb_complete _ _ H2) in H0.
+    elim (sumbool_of_bool (N.eqb a1 a0)). intro H2. rewrite (Neqb_complete _ _ H2) in H0.
     rewrite (Nless_not_refl a0) in H0. discriminate H0.
     intro H2. rewrite H2. apply H. apply Nless_trans with (a' := a1). assumption.
     unfold alist_sorted_2 in H1. apply (H1 0 1). apply lt_n_Sn.
@@ -310,7 +310,7 @@ Section LSort.
      {n : nat | S n <= length l /\ alist_nth_ad n l = a}.
   Proof.
     simple induction l. intros. discriminate H.
-    intro r. elim r. intros a y l0 H a0 y0 H0. simpl in H0. elim (sumbool_of_bool (Neqb a a0)).
+    intro r. elim r. intros a y l0 H a0 y0 H0. simpl in H0. elim (sumbool_of_bool (N.eqb a a0)).
     intro H1. rewrite H1 in H0. split with 0. split. simpl in |- *. apply le_n_S. apply le_O_n.
     simpl in |- *. exact (Neqb_complete _ _ H1).
     intro H1. rewrite H1 in H0. elim (H a0 y0 H0). intros n' H2. split with (S n'). split.
@@ -323,9 +323,9 @@ Section LSort.
      alist_sorted_2 ((a, y) :: l) ->
      eqm A (alist_semantics A l)
        (fun a0:ad =>
-          if Neqb a a0 then None else alist_semantics A ((a, y) :: l) a0).
+          if N.eqb a a0 then None else alist_semantics A ((a, y) :: l) a0).
   Proof.
-    unfold eqm in |- *. intros. elim (sumbool_of_bool (Neqb a a0)). intro H0. rewrite H0.
+    unfold eqm in |- *. intros. elim (sumbool_of_bool (N.eqb a a0)). intro H0. rewrite H0.
     rewrite <- (Neqb_complete _ _ H0). unfold alist_sorted_2 in H.
     elim (option_sum A (alist_semantics A l a)). intro H1. elim H1. intros y0 H2.
     elim (alist_semantics_nth_ad l a y0 H2). intros n H3. elim H3. intros.
@@ -348,7 +348,7 @@ Section LSort.
      eqm A (alist_semantics A l) (alist_semantics A l').
   Proof.
     unfold eqm in |- *. intros. rewrite (alist_semantics_tail _ _ _ H a0).
-    rewrite (alist_semantics_tail _ _ _ H0 a0). case (Neqb a a0). reflexivity.
+    rewrite (alist_semantics_tail _ _ _ H0 a0). case (N.eqb a a0). reflexivity.
     exact (H1 a0).
   Qed.
 
@@ -369,7 +369,7 @@ Section LSort.
     intro r. elim r. intros a y l0 H H0 H1 H2. simpl in H0.
     cut
      (None =
-      match Neqb a a with
+      match N.eqb a a with
       | true => Some y
       | false => alist_semantics A l0 a
       end).
@@ -377,7 +377,7 @@ Section LSort.
     exact (H0 a).
     intro r. elim r. intros a y l0 H. simple induction l'. intros. simpl in H0.
     cut
-     (match Neqb a a with
+     (match N.eqb a a with
       | true => Some y
       | false => alist_semantics A l0 a
       end = None).
