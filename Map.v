@@ -24,15 +24,17 @@ Definition ad := N.
 (* a Notation or complete replacement would be nice, 
    but that would changes hyps names *)
 
+(** We now define maps from ad to A. *)
+
+Inductive Map A :=
+  | M0 : Map A
+  | M1 : ad -> A -> Map A
+  | M2 : Map A -> Map A -> Map A.
+
 Section MapDefs.
 
 (** We now define maps from ad to A. *)
   Variable A : Type.  
-
-  Inductive Map :=
-    | M0 : Map
-    | M1 : ad -> A -> Map
-    | M2 : Map -> Map -> Map.
 
   Lemma option_sum : forall o:option A, {y : A | o = Some y} + {o = None}.
   Proof.
@@ -45,7 +47,7 @@ Section MapDefs.
       The semantics of a map [m] is a partial, finite function from
       [ad] to [A]: *)
 
-  Fixpoint MapGet (m:Map) : ad -> option A :=
+  Fixpoint MapGet (m:Map A) : ad -> option A :=
     match m with
     | M0 => fun a:ad => None
     | M1 x y => fun a:ad => if N.eqb x a then Some y else None
@@ -59,9 +61,13 @@ Section MapDefs.
           end
     end.
 
-  Definition newMap := M0.
+  Definition newMap := M0 A.
 
-  Definition MapSingleton := M1.
+  Definition MapSingleton := M1 A.
+
+  Local Arguments M0 {A}.
+  Local Arguments M1 {A}.
+  Local Arguments M2 {A}.
 
   Definition eqm (g g':ad -> option A) := forall a:ad, g a = g' a.
 
@@ -90,14 +96,14 @@ Section MapDefs.
   Qed.
 
   Lemma Map2_semantics_1 :
-   forall m m':Map,
+   forall m m':Map A,
      eqm (MapGet m) (fun a:ad => MapGet (M2 m m') (N.double a)).
   Proof.
     unfold eqm in |- *. simple induction a; trivial.
   Qed.
 
   Lemma Map2_semantics_1_eq :
-   forall (m m':Map) (f:ad -> option A),
+   forall (m m':Map A) (f:ad -> option A),
      eqm (MapGet (M2 m m')) f -> eqm (MapGet m) (fun a:ad => f (N.double a)).
   Proof.
     unfold eqm in |- *.
@@ -107,14 +113,14 @@ Section MapDefs.
   Qed.
 
   Lemma Map2_semantics_2 :
-   forall m m':Map,
+   forall m m':Map A,
      eqm (MapGet m') (fun a:ad => MapGet (M2 m m') (Ndouble_plus_one a)).
   Proof.
     unfold eqm in |- *. simple induction a; trivial.
   Qed.
 
   Lemma Map2_semantics_2_eq :
-   forall (m m':Map) (f:ad -> option A),
+   forall (m m':Map A) (f:ad -> option A),
      eqm (MapGet (M2 m m')) f ->
      eqm (MapGet m') (fun a:ad => f (Ndouble_plus_one a)).
   Proof.
@@ -127,7 +133,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_0 :
    forall a:ad,
      Nbit0 a = false ->
-     forall m m':Map, MapGet (M2 m m') a = MapGet m (N.div2 a).
+     forall m m':Map A, MapGet (M2 m m') a = MapGet m (N.div2 a).
   Proof.
     simple induction a; trivial. simple induction p. intros. discriminate H0.
     trivial.
@@ -137,7 +143,7 @@ Section MapDefs.
   Lemma MapGet_M2_bit_0_1 :
    forall a:ad,
      Nbit0 a = true ->
-     forall m m':Map, MapGet (M2 m m') a = MapGet m' (N.div2 a).
+     forall m m':Map A, MapGet (M2 m m') a = MapGet m' (N.div2 a).
   Proof.
     simple induction a. intros. discriminate H.
     simple induction p. trivial.
@@ -146,7 +152,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapGet_M2_bit_0_if :
-   forall (m m':Map) (a:ad),
+   forall (m m':Map A) (a:ad),
      MapGet (M2 m m') a =
      (if Nbit0 a then MapGet m' (N.div2 a) else MapGet m (N.div2 a)).
   Proof.
@@ -156,7 +162,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapGet_M2_bit_0 :
-   forall (m m' m'':Map) (a:ad),
+   forall (m m' m'':Map A) (a:ad),
      (if Nbit0 a then MapGet (M2 m' m) a else MapGet (M2 m m'') a) =
      MapGet m (N.div2 a).
   Proof.
@@ -166,7 +172,7 @@ Section MapDefs.
   Qed.
 
   Lemma Map2_semantics_3 :
-   forall m m':Map,
+   forall m m':Map A,
      eqm (MapGet (M2 m m'))
        (fun a:ad =>
           match Nbit0 a with
@@ -180,7 +186,7 @@ Section MapDefs.
   Qed.
 
   Lemma Map2_semantics_3_eq :
-   forall (m m':Map) (f f':ad -> option A),
+   forall (m m':Map A) (f f':ad -> option A),
      eqm (MapGet m) f ->
      eqm (MapGet m') f' ->
      eqm (MapGet (M2 m m'))
@@ -198,7 +204,7 @@ Section MapDefs.
   Qed.
 
   Fixpoint MapPut1 (a:ad) (y:A) (a':ad) (y':A) (p:positive) {struct p} :
-   Map :=
+   Map A :=
     match p with
     | xO p' =>
         let m := MapPut1 (N.div2 a) y (N.div2 a') y' p' in
@@ -214,7 +220,7 @@ Section MapDefs.
     end.
 
   Lemma MapGet_if_commute :
-   forall (b:bool) (m m':Map) (a:ad),
+   forall (b:bool) (m m':Map A) (a:ad),
      MapGet (if b then m else m') a = (if b then MapGet m a else MapGet m' a).
   Proof.
     intros. case b; trivial.
@@ -234,13 +240,13 @@ Section MapDefs.
   i*)
 
   Lemma MapGet_if_same :
-   forall (m:Map) (b:bool) (a:ad), MapGet (if b then m else m) a = MapGet m a.
+   forall (m:Map A) (b:bool) (a:ad), MapGet (if b then m else m) a = MapGet m a.
   Proof.
     simple induction b; trivial.
   Qed.
 
   Lemma MapGet_M2_bit_0_2 :
-   forall (m m' m'':Map) (a:ad),
+   forall (m m' m'':Map A) (a:ad),
      MapGet (if Nbit0 a then M2 m m' else M2 m' m'') a =
      MapGet m' (N.div2 a).
   Proof.
@@ -270,7 +276,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapGet_M2_both_None :
-   forall (m m':Map) (a:ad),
+   forall (m m':Map A) (a:ad),
      MapGet m (N.div2 a) = None ->
      MapGet m' (N.div2 a) = None -> MapGet (M2 m m') a = None.
   Proof.
@@ -345,7 +351,7 @@ Section MapDefs.
     intro H0. rewrite H0. reflexivity.
   Qed.
 
-  Fixpoint MapPut (m:Map) : ad -> A -> Map :=
+  Fixpoint MapPut (m:Map A) : ad -> A -> Map A :=
     match m with
     | M0 => M1
     | M1 a y =>
@@ -402,7 +408,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapPut_semantics_3_1 :
-   forall (m m':Map) (a:ad) (y:A),
+   forall (m m':Map A) (a:ad) (y:A),
      MapPut (M2 m m') a y =
      (if Nbit0 a
       then M2 m (MapPut m' (N.div2 a) y)
@@ -413,7 +419,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapPut_semantics :
-   forall (m:Map) (a:ad) (y:A),
+   forall (m:Map A) (a:ad) (y:A),
      eqm (MapGet (MapPut m a y))
        (fun a':ad => if N.eqb a a' then Some y else MapGet m a').
   Proof.
@@ -435,7 +441,7 @@ Section MapDefs.
     intro H3. rewrite H3. rewrite <- H2 in H1. rewrite (Ndiv2_bit_neq a a0 H3 H1). reflexivity.
   Qed.
 
-  Fixpoint MapPut_behind (m:Map) : ad -> A -> Map :=
+  Fixpoint MapPut_behind (m:Map A) : ad -> A -> Map A :=
     match m with
     | M0 => M1
     | M1 a y =>
@@ -455,7 +461,7 @@ Section MapDefs.
     end.
 
   Lemma MapPut_behind_semantics_3_1 :
-   forall (m m':Map) (a:ad) (y:A),
+   forall (m m':Map A) (a:ad) (y:A),
      MapPut_behind (M2 m m') a y =
      (if Nbit0 a
       then M2 m (MapPut_behind m' (N.div2 a) y)
@@ -479,7 +485,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapPut_behind_as_before :
-   forall (m:Map) (a:ad) (y:A) (a0:ad),
+   forall (m:Map A) (a:ad) (y:A) (a0:ad),
      N.eqb a a0 = false ->
      MapGet (MapPut m a y) a0 = MapGet (MapPut_behind m a y) a0.
   Proof.
@@ -496,7 +502,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapPut_behind_new :
-   forall (m:Map) (a:ad) (y:A),
+   forall (m:Map A) (a:ad) (y:A),
      MapGet (MapPut_behind m a y) a =
      match MapGet m a with
      | Some y' => Some y'
@@ -516,7 +522,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapPut_behind_semantics :
-   forall (m:Map) (a:ad) (y:A),
+   forall (m:Map A) (a:ad) (y:A),
      eqm (MapGet (MapPut_behind m a y))
        (fun a':ad =>
           match MapGet m a' with
@@ -530,7 +536,7 @@ Section MapDefs.
     rewrite (MapPut_semantics m a y a0). rewrite H. case (MapGet m a0); trivial.
   Qed.
 
-  Definition makeM2 (m m':Map) :=
+  Definition makeM2 (m m':Map A) :=
     match m, m' with
     | M0, M0 => M0
     | M0, M1 a y => M1 (Ndouble_plus_one a) y
@@ -539,7 +545,7 @@ Section MapDefs.
     end.
 
   Lemma makeM2_M2 :
-   forall m m':Map, eqm (MapGet (makeM2 m m')) (MapGet (M2 m m')).
+   forall m m':Map A, eqm (MapGet (makeM2 m m')) (MapGet (M2 m m')).
   Proof.
     unfold eqm in |- *. intros. elim (sumbool_of_bool (Nbit0 a)). intro H.
     rewrite (MapGet_M2_bit_0_1 a H m m'). case m'. case m. reflexivity.
@@ -576,7 +582,7 @@ Section MapDefs.
     intros m1 m2. unfold makeM2 in |- *. exact (MapGet_M2_bit_0_0 a H (M2 m1 m2) m').
   Qed.
 
-  Fixpoint MapRemove (m:Map) : ad -> Map :=
+  Fixpoint MapRemove (m:Map A) : ad -> Map A :=
     match m with
     | M0 => fun _:ad => M0
     | M1 a y =>
@@ -592,7 +598,7 @@ Section MapDefs.
     end.
 
   Lemma MapRemove_semantics :
-   forall (m:Map) (a:ad),
+   forall (m:Map A) (a:ad),
      eqm (MapGet (MapRemove m a))
        (fun a':ad => if N.eqb a a' then None else MapGet m a').
   Proof.
@@ -632,19 +638,19 @@ Section MapDefs.
     assumption.
   Qed.
 
-  Fixpoint MapCard (m:Map) : nat :=
+  Fixpoint MapCard (m:Map A) : nat :=
     match m with
     | M0 => 0
     | M1 _ _ => 1
     | M2 m m' => MapCard m + MapCard m'
     end.
 
-  Fixpoint MapMerge (m:Map) : Map -> Map :=
+  Fixpoint MapMerge (m:Map A) : Map A -> Map A :=
     match m with
-    | M0 => fun m':Map => m'
-    | M1 a y => fun m':Map => MapPut_behind m' a y
+    | M0 => fun m':Map A => m'
+    | M1 a y => fun m':Map A => MapPut_behind m' a y
     | M2 m1 m2 =>
-        fun m':Map =>
+        fun m':Map A =>
           match m' with
           | M0 => m
           | M1 a' y' => MapPut m a' y'
@@ -653,7 +659,7 @@ Section MapDefs.
     end.
 
   Lemma MapMerge_semantics :
-   forall m m':Map,
+   forall m m':Map A,
      eqm (MapGet (MapMerge m m'))
        (fun a0:ad =>
           match MapGet m' a0 with
@@ -678,17 +684,17 @@ Section MapDefs.
   (** [MapInter], [MapRngRestrTo], [MapRngRestrBy], [MapInverse] 
       not implemented: need a decidable equality on [A]. *)
 
-  Fixpoint MapDelta (m:Map) : Map -> Map :=
+  Fixpoint MapDelta (m:Map A) : Map A -> Map A :=
     match m with
-    | M0 => fun m':Map => m'
+    | M0 => fun m':Map A => m'
     | M1 a y =>
-        fun m':Map =>
+        fun m':Map A =>
           match MapGet m' a with
           | None => MapPut m' a y
           | _ => MapRemove m' a
           end
     | M2 m1 m2 =>
-        fun m':Map =>
+        fun m':Map A =>
           match m' with
           | M0 => m
           | M1 a' y' =>
@@ -701,7 +707,7 @@ Section MapDefs.
     end.
 
   Lemma MapDelta_semantics_comm :
-   forall m m':Map, eqm (MapGet (MapDelta m m')) (MapGet (MapDelta m' m)).
+   forall m m':Map A, eqm (MapGet (MapDelta m m')) (MapGet (MapDelta m' m)).
   Proof.
     unfold eqm in |- *. simple induction m. simple induction m'; reflexivity.
     simple induction m'. reflexivity.
@@ -728,7 +734,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_1_1 :
-   forall (a:ad) (y:A) (m':Map) (a0:ad),
+   forall (a:ad) (y:A) (m':Map A) (a0:ad),
      MapGet (M1 a y) a0 = None ->
      MapGet m' a0 = None -> MapGet (MapDelta (M1 a y) m') a0 = None.
   Proof.
@@ -740,7 +746,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_1 :
-   forall (m m':Map) (a:ad),
+   forall (m m':Map A) (a:ad),
      MapGet m a = None ->
      MapGet m' a = None -> MapGet (MapDelta m m') a = None.
   Proof.
@@ -758,7 +764,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_2_1 :
-   forall (a:ad) (y:A) (m':Map) (a0:ad) (y0:A),
+   forall (a:ad) (y:A) (m':Map A) (a0:ad) (y0:A),
      MapGet (M1 a y) a0 = None ->
      MapGet m' a0 = Some y0 -> MapGet (MapDelta (M1 a y) m') a0 = Some y0.
   Proof.
@@ -770,7 +776,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_2_2 :
-   forall (a:ad) (y:A) (m':Map) (a0:ad) (y0:A),
+   forall (a:ad) (y:A) (m':Map A) (a0:ad) (y0:A),
      MapGet (M1 a y) a0 = Some y0 ->
      MapGet m' a0 = None -> MapGet (MapDelta (M1 a y) m') a0 = Some y0.
   Proof.
@@ -782,7 +788,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_2 :
-   forall (m m':Map) (a:ad) (y:A),
+   forall (m m':Map A) (a:ad) (y:A),
      MapGet m a = None ->
      MapGet m' a = Some y -> MapGet (MapDelta m m') a = Some y.
   Proof.
@@ -800,7 +806,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_3_1 :
-   forall (a0:ad) (y0:A) (m':Map) (a:ad) (y y':A),
+   forall (a0:ad) (y0:A) (m':Map A) (a:ad) (y y':A),
      MapGet (M1 a0 y0) a = Some y ->
      MapGet m' a = Some y' -> MapGet (MapDelta (M1 a0 y0) m') a = None.
   Proof.
@@ -811,7 +817,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics_3 :
-   forall (m m':Map) (a:ad) (y y':A),
+   forall (m m':Map A) (a:ad) (y y':A),
      MapGet m a = Some y ->
      MapGet m' a = Some y' -> MapGet (MapDelta m m') a = None.
   Proof.
@@ -830,7 +836,7 @@ Section MapDefs.
   Qed.
 
   Lemma MapDelta_semantics :
-   forall m m':Map,
+   forall m m':Map A,
      eqm (MapGet (MapDelta m m'))
        (fun a0:ad =>
           match MapGet m a0, MapGet m' a0 with
@@ -849,7 +855,7 @@ Section MapDefs.
     intro H0. rewrite H0. exact (MapDelta_semantics_1 m m' a H0 H).
   Qed.
 
-  Definition MapEmptyp (m:Map) := match m with
+  Definition MapEmptyp (m:Map A) := match m with
                                   | M0 => true
                                   | _ => false
                                   end.
@@ -859,7 +865,7 @@ Section MapDefs.
     reflexivity.
   Qed.
 
-  Lemma MapEmptyp_complete : forall m:Map, MapEmptyp m = true -> m = M0.
+  Lemma MapEmptyp_complete : forall m:Map A, MapEmptyp m = true -> m = M0.
   Proof.
     simple induction m; trivial. intros. discriminate H.
     intros. discriminate H1.
